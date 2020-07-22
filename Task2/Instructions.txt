@@ -1,0 +1,13 @@
+The game i'd try to recreate was Enter The Gungeon. (top-down, bullet-hell, shooter genre)
+
+i'd mange to get the movement and mechanic part of the character working,
+so the remaining part would be to:
+spawn enemies.
+be able to proceed to next room/floor.
+table flips. :D
+
+INSTRUCTIONS
+WASD-keys to move.
+left-click to shoot.
+R-key to reload.
+spacebar to jump (hold to remain in the air for longer, like in Mario Bros)
