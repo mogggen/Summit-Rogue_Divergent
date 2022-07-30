@@ -1,10 +1,11 @@
 #pragma once
-#include "Shape.h"
-class Circle : public Shape
+#include "SDL.h"
+#include "Point.h"
+class Circle
 {
+	point pos;
 	float radius;
 public:
-	Circle();
-	void SetCircle(Point2D position, float radius);
+	void SetCircle(point position, float radius);
 	void render(SDL_Renderer *renderer);
 };
