@@ -1,0 +1,14 @@
+---- information ----
+Sex: Male, Female
+Orientation: Straight, Gay
+
+---- Status ----
+Action: Idle (seaching for [resource], fighting, reporting, scouting, plotting, gathering, looting, eating, inventing, sleeping, training)
+Fear: 0-99
+Loyalty: 0-99
+Anger: 0-99
+Hunger: 0-99
+
+---- Skills ----
+Agility M: 50-99, F: 0-49
+Stealth = M: 0-49, F: 50-99
