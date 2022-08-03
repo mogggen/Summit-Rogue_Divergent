@@ -54,6 +54,21 @@ follow
 stop following
 -----
 
+----- Sanctions -----
+Oligarchs
+are bourdensome, and your improved reletionship with them usually bothers the other groups by a varied amount (millitary and Rebels most, and Agriculture sligthly less), exposed by Rebels
+
+Rebels
+Gather Intel about the enemy villages
+Will keep the public informed on how you treat your people (and raise anger when bad decisions are made)
+Do not fight voluntarely
+
+Military
+Recruits troop from other sanctions, the most fit ones they can find.
+Generates ammo and guns for the army.
+Protects the village during a raid.
+are the first to serve your order to conquer the enemy.
+
 ----- extra -----
 10% of allies spawn in gay and can’t therfore repopulate
 homofobic groups may try to kill of the gay people
