@@ -3,12 +3,13 @@
     "tasks": [
         {
             "label": "Generate project",
-            "command": "cmake -S . -B build",
+            "command": "cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug",
             "type": "shell",
             "options": {
                 "cwd": "${workspaceFolder}"
             },
             "group": "none",
+            "problemMatcher": []
         },
         {
             "label": "Build project",

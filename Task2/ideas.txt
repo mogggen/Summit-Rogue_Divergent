@@ -24,8 +24,13 @@ if (Hunger < 20)
 # easier to convince of anything
 
 if (Hunger < 10)
-# canibalism
+# canibalism or corpses if there are some nearby
 # even easier to convince
+
+if (Hunger == 0)
+# stays put and contributes with it's stats 2 fold to the group
+# when plenty of one sanction (or multiple ones die) is usually when revelotion starts if they where close to dissatisfaction
+
 
 attractiveness = average of all stats
 

@@ -2,11 +2,59 @@
 #include <vector>
 #include <ctime>
 #include <cmath>
-#include "Circle.h"
 #include "SDL.h"
 
+#define un unsigned
+
+int windowWidth = 1000, windowHeight = 800;
+int entitySize = 30;
+
+void renderCircle(SDL_Renderer *renderer, float cx, float cy, float radius)
+{
+	for (int h = 0; h < radius * 2; h++)
+	{
+		int x1, x2;
+		int dy = radius - h;
+		int dx = SDL_sqrt(radius * radius - dy * dy);
+		x1 = dx;
+		x2 = -dx;
+		SDL_RenderDrawLine(renderer, cx + radius + x1, cy + radius + dy, cx + radius + x2, cy + radius + dy);
+	}
+}
+
+std::vector<int> posX;
+std::vector<int> posY;
+
+std::vector<bool> isGay;
+std::vector<bool> ageOfAdulthood;
 std::vector<bool> isMale;
-// std::vector<int> ;
+
+std::vector<int> agility;
+std::vector<int> stealth;
+std::vector<int> hunger;
+std::vector<int> atraction;
+
+std::vector<int> fear;
+std::vector<int> morale;
+
+std::vector<int> reputation;
+std::vector<int> popularity;
+
+// corpses
+std::vector<int> rotting;
+
+void spawnEntities(size_t count=10)
+{
+	for (size_t i = 0; i < count; i++)
+	{
+		posX.push_back(rand() % windowWidth - entitySize);
+		posY.push_back(rand() % windowHeight - entitySize);
+
+		ageOfAdulthood.push_back(18 + rand() % 7);
+		
+	}
+	
+}
 
 // float aiming(float px, float py, float mx, float my)
 // {
@@ -20,35 +68,25 @@ std::vector<bool> isMale;
 // 		return SDL_atanf(float(py - my) / float(px - mx));
 // }
 
-int main()
-void main()
-void main(void)
-int main(void)
-int main(int argc, char **argv)
 int main(int argc, char* argv[])
 {
 	bool isInMenu = true;
 	srand((unsigned)time(nullptr));
-	const char title[18] = "Enter the Gungeon";
-	int enemies = 0;
 	bool quit = false;
-	int windowWidth = 1000, windowHeight = 800;
 	SDL_Init(SDL_INIT_EVERYTHING);
 	SDL_Event event;
-	std::cout << "----" << title << "----" << std::endl;
-	std::cout << "Resolution: " << windowWidth << "x" << windowHeight << std::endl;
-	std::cout << "WASD to move\nleft_click to shoot\nSPACE to jump";
-	SDL_Window *window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, SDL_WINDOW_SHOWN);
+	SDL_Window *window = SDL_CreateWindow("title", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, SDL_WINDOW_SHOWN);
 	SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, 0);
 
 	int frameDelay = 17;
+
+	sp
 
 	int mx = 0;
 	int my = 0;
 	int px = windowWidth / 2;
 	int py = windowHeight / 2;
 	int v = 5;
-	int s = 30;
 
 	int heartCount = 3;
 	int ammoCount = 10;
@@ -68,10 +106,6 @@ int main(int argc, char* argv[])
 	bool floating = false;
 	int temp = py;
 	int deltaTime;
-
-	Circle* head = new Circle();
-	Circle* torso = new Circle();
-	Circle *shadow = new Circle();
 
 	while (!quit)
 	{
@@ -144,9 +178,9 @@ int main(int argc, char* argv[])
 
 		//movement
 		if (up && py >= 0) py -= v;
-		if (down && py < windowHeight - s * 3) py += v;
+		if (down && py < windowHeight - entitySize * 3) py += v;
 		if (left && px >= 0) px -= v;
-		if (right && px < windowWidth - s) px += v;
+		if (right && px < windowWidth - entitySize) px += v;
 
 		//checks cursor position
 		if (0 < event.motion.x &&
@@ -159,10 +193,6 @@ int main(int argc, char* argv[])
 			my = event.motion.y;
 		}
 
-		head->SetCircle(point(px + 2, py - s + 2), s);
-
-		torso->SetCircle(point(px, py), s);
-
 		//
 		//	rendering
 		//
@@ -173,25 +203,14 @@ int main(int argc, char* argv[])
 
 		//head
 		SDL_SetRenderDrawColor(renderer, 150, 50, 99, 0);
-		head->render(renderer);
-
-		//torso
-		SDL_SetRenderDrawColor(renderer, 195, 50, 99, 0);
-		torso->render(renderer);
+		renderCircle(renderer, px, py, entitySize);
 
 		SDL_RenderPresent(renderer);
-
-
 
 		deltaTime = SDL_GetTicks() - deltaTime;
 		if (frameDelay > deltaTime)
 			SDL_Delay(frameDelay - deltaTime);
 	} //end of game-loop
-	delete head;
-
-	delete torso;
-
-	delete shadow;
 
 	SDL_DestroyWindow(window);
 	SDL_DestroyRenderer(renderer);
