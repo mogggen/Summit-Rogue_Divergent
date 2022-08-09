@@ -6,8 +6,16 @@
 
 #define un unsigned
 
+float detection_range = 10.f;
+float travelSpeed = 0.01f;
 int windowWidth = 1000, windowHeight = 800;
 int entitySize = 30;
+
+int mx = 0;
+int my = 0;
+int px = windowWidth / 2;
+int py = windowHeight / 2;
+int v = 5;
 
 void renderCircle(SDL_Renderer *renderer, float cx, float cy, float radius)
 {
@@ -40,10 +48,58 @@ std::vector<int> morale;
 std::vector<int> reputation;
 std::vector<int> popularity;
 
+std::vector<int> oli_index;
+std::vector<int> agr_index;
+std::vector<int> mil_index;
+std::vector<int> reb_index;
+
 // corpses
 std::vector<int> rotting;
 
-void spawnEntities(size_t count=10)
+enum Sanctions
+{
+	Oligarchs,
+	Rebels,
+	Military,
+	Agriculture
+};
+
+void updateSanction(float &localX, float &localY, float &divisor, std::vector<int> sanction_index)
+{
+	for (size_t i = 0; i < sanction_index.size(); i++)
+	{
+		localX += posX[sanction_index[i]] * atraction[sanction_index[i]];
+		localY += posY[sanction_index[i]] * atraction[sanction_index[i]];
+		divisor += atraction[sanction_index[i]];
+	}
+	localX /= divisor;
+	localY /= divisor;
+
+	for (size_t i = 0; i < sanction_index.size(); i++)
+	{
+		size_t j = 0;
+		for (; j < sanction_index.size(); j++)
+		{
+			if (posX[sanction_index[i]] + (localX - posX[sanction_index[i]]) * travelSpeed < posX[sanction_index[j]] + 2
+			&& posX[sanction_index[i]] + (localX - posX[sanction_index[i]]) * travelSpeed > posX[sanction_index[j]] - 2
+			&& posY[sanction_index[i]] + (localX - posY[sanction_index[i]]) * travelSpeed < posY[sanction_index[j]] + 2
+			&& posY[sanction_index[i]] + (localX - posY[sanction_index[i]]) * travelSpeed > posY[sanction_index[j]] - 2)
+			{
+				j = 0;
+				i++;
+				break;
+			}
+		}
+		if (j == sanction_index.size())
+		{
+			posX[sanction_index[i]] += (localX - posX[sanction_index[i]]) * travelSpeed;
+			posY[sanction_index[i]] += (localY - posY[sanction_index[i]]) * travelSpeed;
+		}
+	}
+}
+
+
+void spawnEntities(size_t count)
 {
 	for (size_t i = 0; i < count; i++)
 	{
@@ -51,9 +107,102 @@ void spawnEntities(size_t count=10)
 		posY.push_back(rand() % windowHeight - entitySize);
 
 		ageOfAdulthood.push_back(18 + rand() % 7);
-		
+		isMale.push_back(rand() % 2);
+
+		const size_t last_index = isMale.size() - 1;
+
+		agility.push_back(rand() % 50 + 50 * isMale[last_index]);
+		stealth.push_back(rand() % 50 + 50 * !isMale[last_index]);
+		hunger.push_back(rand() % 50 + 50);
+
+		fear.push_back(rand() % 100);
+		morale.push_back(rand() % 100);
+
+		reputation.push_back(rand() % 100);
+		popularity.push_back(rand() % 100);
+
+		switch ((Sanctions)(rand() % 4))
+		{
+		case Military:
+			mil_index.push_back(last_index);
+			break;
+
+		case Oligarchs:
+			oli_index.push_back(last_index);
+			break;
+
+		case Agriculture:
+			agr_index.push_back(last_index);
+			break;
+
+		case Rebels:
+			reb_index.push_back(last_index);
+			break;
+		}
+
+		atraction.push_back
+		(
+			agility[last_index] +
+			stealth[last_index] +
+			hunger[last_index] +
+			fear[last_index] +
+			morale[last_index] +
+			reputation[last_index] +
+			popularity[last_index]
+		);
+	}
+}
+
+void updateGameLogic()
+{
+	// movement for atraction and mating
+	float localX = 0.f;
+	float localY = 0.f;
+	float divisor = 0.f;
+	
+	updateSanction(localX, localY, divisor, agr_index);
+
+	localX = 0.f;
+	localY = 0.f;
+	divisor = 0.f;
+	
+	updateSanction(localX, localY, divisor, mil_index);
+
+	localX = 0.f;
+	localY = 0.f;
+	divisor = 0.f;
+
+	updateSanction(localX, localY, divisor, oli_index);
+
+	localX = 0.f;
+	localY = 0.f;
+	divisor = 0.f;
+	
+	updateSanction(localX, localY, divisor, reb_index);
+
+	// movement when undergoing survailance (state machine)
+	
+	for (size_t i = 0; i < agr_index.size(); i++)
+	{
+		if (sqrtf(powf(px - posX[agr_index[i]], 2) + powf(py - posY[agr_index[i]], 2)) < detection_range * stealth[agr_index[i]])
+		{
+			// generate food for everyone
+
+			// gather at designated location
+			// carry back
+			// repeat
+
+			// generate building materials for houses
+
+			// smelt materials
+			// travel to forest
+			// chop down at forest
+			// return to base
+			// repeat
+		}
 	}
 	
+	/* code */
 }
 
 // float aiming(float px, float py, float mx, float my)
@@ -80,31 +229,11 @@ int main(int argc, char* argv[])
 
 	int frameDelay = 17;
 
-	sp
-
-	int mx = 0;
-	int my = 0;
-	int px = windowWidth / 2;
-	int py = windowHeight / 2;
-	int v = 5;
-
-	int heartCount = 3;
-	int ammoCount = 10;
-	bool isReloading = false;
-	int reloadingProgress = 0;
-
-	int fireDelay = 0;
+	spawnEntities(1000);
 
 	bool up = false, down = false, left = false, right = false;
 
-	int vv = 0;
-	int a = 3;
-
 	float aim = 0;
-	int floorCount = 1;
-	bool jumping = false;
-	bool floating = false;
-	int temp = py;
 	int deltaTime;
 
 	while (!quit)
@@ -200,6 +329,34 @@ int main(int argc, char* argv[])
 		//Background
 		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 		SDL_RenderClear(renderer);
+
+		for (size_t i = 0; i < mil_index.size(); i++)
+		{
+			SDL_SetRenderDrawColor(renderer, 0, 255, 0, 0);
+			renderCircle(renderer, posX[mil_index[i]], posY[mil_index[i]], 4);
+		}
+
+		for (size_t i = 0; i < agr_index.size(); i++)
+		{
+			SDL_SetRenderDrawColor(renderer, 139, 69, 19, 0);
+			renderCircle(renderer, posX[agr_index[i]], posY[agr_index[i]], 4);
+		}
+
+		for (size_t i = 0; i < reb_index.size(); i++)
+		{
+			SDL_SetRenderDrawColor(renderer, 255, 0, 0, 0);
+			renderCircle(renderer, posX[reb_index[i]], posY[reb_index[i]], 4);
+		}
+
+		for (size_t i = 0; i < oli_index.size(); i++)
+		{
+			SDL_SetRenderDrawColor(renderer, 215, 215, 0, 0);
+			renderCircle(renderer, posX[oli_index[i]], posY[oli_index[i]], 4);
+		}
+		
+		
+		
+		updateGameLogic();
 
 		//head
 		SDL_SetRenderDrawColor(renderer, 150, 50, 99, 0);
