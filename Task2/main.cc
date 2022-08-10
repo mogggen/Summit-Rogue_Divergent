@@ -2,9 +2,12 @@
 #include <vector>
 #include <ctime>
 #include <cmath>
+#include <getopt.h>
 #include "SDL.h"
 
 #define un unsigned
+
+bool debugMode = true; // spawn resources
 
 float detection_range = 10.f;
 float travelSpeed = 0.01f;
@@ -219,6 +222,35 @@ void updateGameLogic()
 
 int main(int argc, char* argv[])
 {
+	int c;
+	while((c = getopt(argc, argv, "dr")) != -1)
+	{
+		switch (std::tolower(c))
+		{
+		case 'd':
+			debugMode = true;
+			break;
+		
+		case 'r':
+			debugMode = false;
+			break;
+		
+		case 'h':
+			// display help
+			break;
+		}
+	}
+
+	// go to bed whithin a span of a day in in-game time, and receive a boost in stats as you're "visited by a sanction of your pick", that increments and decrements certain values
+	// undersleeping grants respect, oversleeping does the opposite
+
+	// TODO
+	// render letters like in Virtual Beggar
+	// get mark area for stats working
+	// give sanctions stuff to do
+	// 
+	// generate resources when they are needed for performance: a resource is spawn at the location randomly picked by the entity/updateLogic (longer away => less likely to spawn)
+
 	bool isInMenu = true;
 	srand((unsigned)time(nullptr));
 	bool quit = false;
