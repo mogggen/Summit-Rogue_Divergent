@@ -1,6 +1,6 @@
 #pragma once
-#include "SDL.h"
-#include <SDL_ttf.h>//https://www.youtube.com/watch?v=1tBzIhVgR7E
+#include "SDL.h"		// https://trenki2.github.io/blog/2017/06/02/using-sdl2-with-cmake/
+#include <SDL_ttf.h>	// https://www.youtube.com/watch?v=1tBzIhVgR7E
 
 namespace Game
 {
