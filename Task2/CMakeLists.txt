@@ -6,5 +6,6 @@ include_directories(SDL2Test ${SDL2_INCLUDE_DIRS})
 
 add_executable(SDL2Test 
 main.cc
-main.h)
+main.h
+hardcodedRaster.h)
 target_link_libraries(SDL2Test ${SDL2_LIBRARIES})

@@ -1,6 +1,6 @@
 #pragma once
-#include "SDL.h"		// https://trenki2.github.io/blog/2017/06/02/using-sdl2-with-cmake/
-#include <SDL_ttf.h>	// https://www.youtube.com/watch?v=1tBzIhVgR7E
+// sigh make your own raster or just hard-code every letter
+//#include <SDL_ttf.h>	// https://www.youtube.com/watch?v=1tBzIhVgR7E
 
 namespace Game
 {
@@ -19,7 +19,7 @@ namespace Game
 	int py = windowHeight / 2;
 	int v = 5;
 
-	std::vector<unsigned> chunkId;
+	std::vector<int> chunkId;
 
 	std::vector<int> posX;
 	std::vector<int> posY;
@@ -32,25 +32,25 @@ namespace Game
 	std::vector<bool> ageOfAdulthood;
 	std::vector<bool> isMale;
 
-	std::vector<unsigned> agility; // ?
-	std::vector<unsigned> stealth;
-	std::vector<unsigned> hunger;
-	std::vector<unsigned> atraction;
+	std::vector<int> agility; // ?
+	std::vector<int> stealth;
+	std::vector<int> hunger;
+	std::vector<int> atraction;
 
-	std::vector<unsigned> inteligence;
-	std::vector<unsigned> fear;
-	std::vector<unsigned> morale;
+	std::vector<int> inteligence;
+	std::vector<int> fear;
+	std::vector<int> morale;
 
-	std::vector<unsigned> reputation;
-	std::vector<unsigned> popularity;
+	std::vector<int> reputation;
+	std::vector<int> popularity;
 
-	std::vector<unsigned> oli_index;
-	std::vector<unsigned> agr_index;
-	std::vector<unsigned> mil_index;
-	std::vector<unsigned> reb_index;
+	std::vector<int> oli_index;
+	std::vector<int> agr_index;
+	std::vector<int> mil_index;
+	std::vector<int> reb_index;
 
 	// corpses
-	std::vector<unsigned> rotting;
+	std::vector<int> rotting;
 
 	enum Sanctions
 	{

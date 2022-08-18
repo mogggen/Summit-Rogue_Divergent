@@ -3,7 +3,9 @@
 #include <ctime>
 #include <cmath>
 #include <getopt.h>
+#include "SDL.h"		// https://trenki2.github.io/blog/2017/06/02/using-sdl2-with-cmake/
 #include "main.h"
+#include "hardcodedRaster.h"
 
 using namespace Game;
 
