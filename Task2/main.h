@@ -163,24 +163,34 @@ namespace Game
 
 		for (size_t i = 0; i < sanction_index.size(); i++)
 		{
-			size_t j = 0;
-			for (; j < sanction_index.size(); j++)
-			{
-				if (posX[sanction_index[i]] + (localX - posX[sanction_index[i]]) * travelSpeed < posX[sanction_index[j]] + 2
-				&& posX[sanction_index[i]] + (localX - posX[sanction_index[i]]) * travelSpeed > posX[sanction_index[j]] - 2
-				&& posY[sanction_index[i]] + (localX - posY[sanction_index[i]]) * travelSpeed < posY[sanction_index[j]] + 2
-				&& posY[sanction_index[i]] + (localX - posY[sanction_index[i]]) * travelSpeed > posY[sanction_index[j]] - 2)
-				{
-					j = 0;
-					i++;
-					break;
-				}
-			}
-			if (j == sanction_index.size())
+			// size_t j = 0;
+			// for (; j < sanction_index.size(); j++)
+			// {
+			// 	if (posX[sanction_index[i]] + (localX - posX[sanction_index[i]]) * travelSpeed < posX[sanction_index[j]] + 2
+			// 	&& posX[sanction_index[i]] + (localX - posX[sanction_index[i]]) * travelSpeed > posX[sanction_index[j]] - 2
+			// 	&& posY[sanction_index[i]] + (localX - posY[sanction_index[i]]) * travelSpeed < posY[sanction_index[j]] + 2
+			// 	&& posY[sanction_index[i]] + (localX - posY[sanction_index[i]]) * travelSpeed > posY[sanction_index[j]] - 2)
+			// 	{
+			// 		j = 0;
+			// 		i++;
+			// 		break;
+			// 	}
+			// }
+			// if (j == sanction_index.size())
+			// {
+			if (i == 0)
+				printf("%f\n", roundf(sqrtf(powf(posX[sanction_index[i] - px], 2) + powf(posY[sanction_index[i]] - py, 2))));
+			if (sqrtf(powf(posX[sanction_index[i] - px], 2) + powf(posY[sanction_index[i]] - py, 2)) > detection_range)
 			{
 				posX[sanction_index[i]] += (localX - posX[sanction_index[i]]) * travelSpeed;
 				posY[sanction_index[i]] += (localY - posY[sanction_index[i]]) * travelSpeed;
 			}
+			else
+			{
+				posX[sanction_index[i]] = rand();
+				posY[sanction_index[i]] = rand();
+			}
+			// }
 		}
 	}
 
@@ -260,25 +270,25 @@ namespace Game
 		float localY = 0.f;
 		float divisor = 0.f;
 		
-		updateSanction(localX, localY, divisor, agr_index);
+		// updateSanction(localX, localY, divisor, agr_index);
 
-		localX = 0.f;
-		localY = 0.f;
-		divisor = 0.f;
+		// localX = 0.f;
+		// localY = 0.f;
+		// divisor = 0.f;
 		
 		updateSanction(localX, localY, divisor, mil_index);
 
-		localX = 0.f;
-		localY = 0.f;
-		divisor = 0.f;
+		// localX = 0.f;
+		// localY = 0.f;
+		// divisor = 0.f;
 
-		updateSanction(localX, localY, divisor, oli_index);
+		// updateSanction(localX, localY, divisor, oli_index);
 
-		localX = 0.f;
-		localY = 0.f;
-		divisor = 0.f;
+		// localX = 0.f;
+		// localY = 0.f;
+		// divisor = 0.f;
 		
-		updateSanction(localX, localY, divisor, reb_index);
+		// updateSanction(localX, localY, divisor, reb_index);
 
 		// movement when undergoing survailance (state machine)
 		

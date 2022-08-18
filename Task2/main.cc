@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
 
 	int frameDelay = 17;
 
-	spawnEntities(1000);
+	spawnEntities(10);
 
 	bool up = false, down = false, left = false, right = false;
 
@@ -159,25 +159,25 @@ int main(int argc, char* argv[])
 			renderCircle(renderer, posX[mil_index[i]], posY[mil_index[i]], 4);
 		}
 
-		for (size_t i = 0; i < agr_index.size(); i++)
-		{
-			SDL_SetRenderDrawColor(renderer, 139, 69, 19, 0);
-			renderCircle(renderer, posX[agr_index[i]], posY[agr_index[i]], 4);
-		}
+		// for (size_t i = 0; i < agr_index.size(); i++)
+		// {
+		// 	SDL_SetRenderDrawColor(renderer, 139, 69, 19, 0);
+		// 	renderCircle(renderer, posX[agr_index[i]], posY[agr_index[i]], 4);
+		// }
 
-		for (size_t i = 0; i < reb_index.size(); i++)
-		{
-			SDL_SetRenderDrawColor(renderer, 255, 0, 0, 0);
-			renderCircle(renderer, posX[reb_index[i]], posY[reb_index[i]], 4);
-		}
+		// for (size_t i = 0; i < reb_index.size(); i++)
+		// {
+		// 	SDL_SetRenderDrawColor(renderer, 255, 0, 0, 0);
+		// 	renderCircle(renderer, posX[reb_index[i]], posY[reb_index[i]], 4);
+		// }
 
-		for (size_t i = 0; i < oli_index.size(); i++)
-		{
-			SDL_SetRenderDrawColor(renderer, 215, 215, 0, 0);
-			renderCircle(renderer, posX[oli_index[i]], posY[oli_index[i]], 4);
-		}
+		// for (size_t i = 0; i < oli_index.size(); i++)
+		// {
+		// 	SDL_SetRenderDrawColor(renderer, 215, 215, 0, 0);
+		// 	renderCircle(renderer, posX[oli_index[i]], posY[oli_index[i]], 4);
+		// }
 		
-		renderMarkedArea(renderer, event, mStartX, mStartY, mDownX, mDownY);
+		// renderMarkedArea(renderer, event, mStartX, mStartY, mDownX, mDownY);
 
 		updateGameLogic();
 
