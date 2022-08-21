@@ -298,6 +298,7 @@ namespace Game
 		if (nextDay < SDL_GetTicks())
 		{
 			nextDay = SDL_GetTicks() + dayDuration;
+			currentDay++;
 		}
 		/* code */
 	}

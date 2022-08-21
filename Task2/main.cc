@@ -149,6 +149,9 @@ int main(int argc, char* argv[])
 			}
 		}
 
+		CharacterRasterization(renderer, std::to_string(currentDay)/* + "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"*/, windowWidth - 100, 50);
+
+
 		for (size_t i = 0; i < mil_index.size(); i++)
 		{
 			SDL_SetRenderDrawColor(renderer, 0, 255, 0, 0);
@@ -177,7 +180,6 @@ int main(int argc, char* argv[])
 
 		updateGameLogic();
 
-		CharacterRasterization(renderer, std::to_string(currentDay) + "ABCDEFGHIJ", windowWidth - 900, 50);
 
 		//head
 		SDL_SetRenderDrawColor(renderer, 150, 50, 99, 0);
