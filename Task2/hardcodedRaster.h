@@ -13,7 +13,9 @@ namespace Game
 #define iii 1, 1, 1,
 
 #define ioooi 1, 0, 0, 0, 1,
+#define iooii 1, 0, 0, 1, 1,
 #define ioioi 1, 0, 1, 0, 1,
+#define iiooi 1, 1, 0, 0, 1,
 #define iioii 1, 1, 0, 1, 1,
 
     void CharacterRasterization(SDL_Renderer* renderer, const std::string& c, int X, int Y, const unsigned w=3, const unsigned h=5)
@@ -281,13 +283,144 @@ namespace Game
                 };
                 break;
             case 'N':
+                coordinatesToRender = new bool[25]
+                {
+                    ioooi
+                    iiooi
+                    ioioi
+                    iooii
+                    ioooi
+                };
+                break;
+            case 'O':
+                coordinatesToRender = new bool[15]
+                {
+                    iii
+                    ioi
+                    ioi
+                    ioi
+                    iii
+                };
+                break;
+
+            case 'P':
+                coordinatesToRender = new bool[15]
+                {
+                    iii
+                    ioi
+                    iii
+                    ioo
+                    ioo
+                };
+                break;
+
+            case 'Q':
+                coordinatesToRender = new bool[25]
+                {
+                    iiiii
+                    ioooi
+                    ioioi
+                    iooio
+                    iiioi
+                };
+                break;
+
+            case 'R':
+                coordinatesToRender = new bool[15]
+                {
+                    iii
+                    ioi
+                    iio
+                    ioi
+                    ioi
+                };
+                break;
+
+            case 'S':
+                coordinatesToRender = new bool[15]
+                {
+                    oii
+                    ioo
+                    iii
+                    ooi
+                    iio
+                };
+                break;
+
+            case 'T':
+                coordinatesToRender = new bool[15]
+                {
+                    iii
+                    oio
+                    oio
+                    oio
+                    oio
+                };
+                break;
+
+            case 'U':
                 coordinatesToRender = new bool[15]
                 {
                     ioi
-                    iii
-                    iii
                     ioi
                     ioi
+                    ioi
+                    iii
+                };
+                break;
+
+            case 'V':
+                coordinatesToRender = new bool[15]
+                {
+                    ioi
+                    ioi
+                    ioi
+                    ioi
+                    oio
+                };
+                break;
+
+            case 'W':
+                coordinatesToRender = new bool[25]
+                {
+                    ioooi
+                    ioooi
+                    ioioi
+                    iioii
+                    ioooi
+                };
+                break;
+
+            case 'X':
+                coordinatesToRender = new bool[15]
+                {
+                    ioi
+                    ioi
+                    oio
+                    ioi
+                    ioi
+                };
+                break;
+
+            case 'Y':
+                coordinatesToRender = new bool[15]
+                {
+                    ioi
+                    ioi
+                    oio
+                    oio
+                    oio
+                };
+                break;
+
+            case 'Z':
+                coordinatesToRender = new bool[15]
+                {
+                    iii
+                    ooi
+                    oio
+                    ioo
+                    iii
                 };
                 break;
             }
