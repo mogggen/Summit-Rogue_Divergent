@@ -12,6 +12,10 @@ namespace Game
 #define iio 1, 1, 0,
 #define iii 1, 1, 1,
 
+#define ioooi 1, 0, 0, 0, 1,
+#define ioioi 1, 0, 1, 0, 1,
+#define iioii 1, 1, 0, 1, 1,
+
     void CharacterRasterization(SDL_Renderer* renderer, const std::string& c, int X, int Y, const unsigned w=3, const unsigned h=5)
     {
         bool* coordinatesToRender = new bool[15];
@@ -253,6 +257,36 @@ namespace Game
                     iio
                     ioo
                     iio
+                    ioi
+                };
+                break;
+            case 'L':
+                coordinatesToRender = new bool[15]
+                {
+                    ioo
+                    ioo
+                    ioo
+                    ioo
+                    iii
+                };
+                break;
+            case 'M':
+                coordinatesToRender = new bool[25]
+                {
+                    ioooi
+                    iioii
+                    ioioi
+                    ioooi
+                    ioooi
+                };
+                break;
+            case 'N':
+                coordinatesToRender = new bool[15]
+                {
+                    ioi
+                    iii
+                    iii
+                    ioi
                     ioi
                 };
                 break;
