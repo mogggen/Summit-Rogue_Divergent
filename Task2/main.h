@@ -4,6 +4,10 @@
 
 namespace Game
 {
+	int currentDay = 0;
+	int dayDuration = 10000;
+	int nextDay;
+
 	bool debugMode = true; // spawn resources
 
 	float detection_range = 10.f;
@@ -178,8 +182,7 @@ namespace Game
 			// }
 			// if (j == sanction_index.size())
 			// {
-			if (i == 0)
-				printf("%f\n", roundf(sqrtf(powf(posX[sanction_index[i] - px], 2) + powf(posY[sanction_index[i]] - py, 2))));
+			
 			if (sqrtf(powf(posX[sanction_index[i] - px], 2) + powf(posY[sanction_index[i]] - py, 2)) > detection_range)
 			{
 				posX[sanction_index[i]] += (localX - posX[sanction_index[i]]) * travelSpeed;
@@ -194,12 +197,12 @@ namespace Game
 		}
 	}
 
-	void queueStateChange(unsigned state)
+	void queueStateChange(const unsigned state)
 	{
 
 	}
 
-	void spawnEntities(size_t count)
+	void spawnEntities(const size_t count)
 	{
 		for (size_t i = 0; i < count; i++)
 		{
@@ -292,8 +295,10 @@ namespace Game
 
 		// movement when undergoing survailance (state machine)
 		
-		
-		
+		if (nextDay < SDL_GetTicks())
+		{
+			nextDay = SDL_GetTicks() + dayDuration;
+		}
 		/* code */
 	}
 

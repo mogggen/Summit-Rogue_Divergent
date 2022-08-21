@@ -110,22 +110,18 @@ int main(int argc, char* argv[])
 				switch (event.key.keysym.sym)
 				{
 				case SDLK_w:
-				case SDLK_UP:
 					up = false;
 					break;
 
 				case SDLK_s:
-				case SDLK_DOWN:
 					down = false;
 					break;
 
 				case SDLK_a:
-				case SDLK_LEFT:
 					left = false;
 					break;
 
 				case SDLK_d:
-				case SDLK_RIGHT:
 					right = false;
 					break;
 				}
@@ -180,6 +176,8 @@ int main(int argc, char* argv[])
 		// renderMarkedArea(renderer, event, mStartX, mStartY, mDownX, mDownY);
 
 		updateGameLogic();
+
+		CharacterRasterization(renderer, std::to_string(currentDay) + "ABCDEFGHIJ", windowWidth - 900, 50);
 
 		//head
 		SDL_SetRenderDrawColor(renderer, 150, 50, 99, 0);

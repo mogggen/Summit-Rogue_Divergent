@@ -140,6 +140,122 @@ namespace Game
                     ooi
                 };
                 break;
+
+            case 'A':
+                coordinatesToRender = new bool[15]
+                {
+                    oio
+                    ioi
+                    iii
+                    ioi
+                    ioi
+                };
+                break;
+
+            case 'B':
+                coordinatesToRender = new bool[15]
+                {
+                    iii
+                    ioi
+                    iio
+                    ioi
+                    iii
+                };
+                break;
+            
+            case 'C':
+                coordinatesToRender = new bool[15]
+                {
+                    iii
+                    ioo
+                    ioo
+                    ioo
+                    iii
+                };
+                break;
+
+            case 'D':
+                coordinatesToRender = new bool[15]
+                {
+                    iio
+                    ioi
+                    ioi
+                    ioi
+                    iio
+                };
+                break;
+
+            case 'E':
+                coordinatesToRender = new bool[15]
+                {
+                    iii
+                    ioo
+                    iii
+                    ioo
+                    iii
+                };
+                break;
+
+            case 'F':
+                coordinatesToRender = new bool[15]
+                {
+                    iii
+                    ioo
+                    iii
+                    ioo
+                    ioo
+                };
+                break;
+            case 'G':
+                coordinatesToRender = new bool[15]
+                {
+                    iii
+                    ioo
+                    ioi
+                    ioi
+                    iii
+                };
+                break;
+            case 'H':
+                coordinatesToRender = new bool[15]
+                {
+                    ioi
+                    ioi
+                    iii
+                    ioi
+                    ioi
+                };
+                break;
+            case 'I':
+                coordinatesToRender = new bool[15]
+                {
+                    iii
+                    oio
+                    oio
+                    oio
+                    iii
+                };
+                break;
+            case 'J':
+                coordinatesToRender = new bool[15]
+                {
+                    iii
+                    ooi
+                    ooi
+                    ioi
+                    iii
+                };
+                break;
+            case 'K':
+                coordinatesToRender = new bool[15]
+                {
+                    ioi
+                    iio
+                    ioo
+                    iio
+                    ioi
+                };
+                break;
             }
 
             SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
