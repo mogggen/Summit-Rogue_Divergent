@@ -39,3 +39,7 @@ gender of offspring = random(0, male_stats) > random(0, female_stats)
 
 Corpse
 rotting = 1-99 // change of disease (random(0, rotting)
+
+
+Miscommunication:
+Depending on intelligence, a person can scramble a incoming message completely and believe it to be authentic. Spreading missinformation or propaganda
