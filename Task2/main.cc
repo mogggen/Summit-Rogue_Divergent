@@ -9,6 +9,113 @@
 
 using namespace Game;
 
+void place_grass(SDL_Renderer* renderer)
+{
+
+}
+
+void animated_grass(SDL_Renderer* renderer, int rootX = windowWidth / 2, int rootY = windowHeight / 2)
+{
+	bool* coordinatesToRender = new bool[49];
+
+	switch ((SDL_GetTicks() / 1000) % 6)
+	{
+	case 0:
+		coordinatesToRender = new bool[49]
+		{
+			0, 0, 0, 0, 0, 0, 0,
+			1, 0, 0, 0, 0, 0, 0,
+			1, 0, 0, 0, 0, 0, 0,
+			1, 0, 0, 0, 0, 1, 0,
+			0, 1, 0, 0, 1, 0, 0,
+			0, 0, 1, 0, 1, 0, 0,
+			0, 0, 0, 1, 0, 0, 0,
+		};
+		break;
+	case 1:
+		coordinatesToRender = new bool[49]
+		{
+			0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0,
+			0, 0, 1, 0, 0, 1, 0,
+			0, 1, 0, 0, 0, 1, 0,
+			0, 1, 0, 0, 1, 0, 0,
+			1, 0, 0, 1, 0, 0, 0,
+			1, 1, 1, 0, 0, 0, 0,
+		};
+		break;
+	case 2:
+		coordinatesToRender = new bool[49]
+		{
+			0, 0, 0, 0, 0, 1, 0,
+			1, 0, 0, 0, 0, 1, 0,
+			1, 0, 0, 0, 0, 1, 0,
+			1, 0, 0, 0, 0, 1, 0,
+			0, 1, 1, 0, 1, 0, 0,
+			0, 0, 0, 1, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0,
+		};
+		break;
+	case 3:
+		coordinatesToRender = new bool[49]
+		{
+			1, 0, 0, 0, 0, 0, 0,
+			1, 0, 1, 0, 0, 0, 0,
+			1, 0, 1, 0, 0, 0, 0,
+			1, 0, 1, 0, 0, 0, 0,
+			0, 1, 0, 1, 0, 0, 0,
+			0, 0, 1, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0,
+		};
+		break;
+	case 4:
+		coordinatesToRender = new bool[49]
+		{
+			0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 1, 0,
+			0, 0, 0, 0, 0, 1, 0,
+			0, 0, 0, 0, 0, 1, 0,
+			0, 0, 1, 0, 0, 1, 0,
+			0, 0, 1, 0, 1, 0, 0,
+			0, 0, 0, 1, 0, 0, 0,
+		};
+		break;
+	case 5:
+		coordinatesToRender = new bool[49]
+		{
+			0, 0, 0, 0, 0, 0, 0,
+			0, 1, 0, 0, 0, 1, 0,
+			0, 1, 0, 0, 0, 1, 0,
+			0, 1, 0, 0, 0, 1, 0,
+			0, 1, 0, 0, 0, 1, 0,
+			0, 0, 1, 0, 1, 0, 0,
+			0, 0, 0, 1, 0, 0, 0,
+		};
+		break;
+	default:
+		exit(100);
+		break;
+	}
+	SDL_SetRenderDrawColor(renderer, 0, 140, 0, 0);
+	SDL_Rect* r = new SDL_Rect[49];
+	int w = 5, h = 5;
+	for (size_t y = 0; y < 7; y++)
+	{
+		for (size_t x = 0; x < 7; x++)
+		{
+			if (coordinatesToRender[y * w + x])
+			{
+				r[y * w + x].x = rootX + x * 7;
+				r[y * w + x].y = rootY + y * 7;
+				r[y * w + x].w = w;
+				r[y * w + x].h = h;
+				SDL_RenderFillRect(renderer, &r[y * w + x]);
+			}
+		}
+	}
+	delete r;
+}
+
 int main(int argc, char* argv[])
 {
 	int c;
@@ -131,7 +238,7 @@ int main(int argc, char* argv[])
 
 		//movement
 		if (up && py >= 0) py -= v;
-		if (down && py < windowHeight - entitySize * 3) py += v;
+		if (down && py < windowHeight - entitySize) py += v;
 		if (left && px >= 0) px -= v;
 		if (right && px < windowWidth - entitySize) px += v;
 
@@ -149,8 +256,8 @@ int main(int argc, char* argv[])
 			}
 		}
 
-		CharacterRasterization(renderer, std::to_string(currentDay)/* + "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"*/, windowWidth - 100, 50);
-
+		// grass renderer
+		animated_grass(renderer);
 
 		for (size_t i = 0; i < mil_index.size(); i++)
 		{
@@ -184,6 +291,15 @@ int main(int argc, char* argv[])
 		//head
 		SDL_SetRenderDrawColor(renderer, 150, 50, 99, 0);
 		renderCircle(renderer, px, py, entitySize);
+
+		CharacterRasterization(renderer, std::to_string(currentDay)/* + "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"*/, windowWidth - 100, 50);
+
+		if (currentDay % 7 == 0)
+		{
+			// items = currentDay / 7;
+			// maybe try activating all items directly, let the number of items gro proportional
+			CharacterRasterization(renderer, "NEW ITEM", windowWidth - 100, windowHeight / 2 - 100);
+		}
 
 		SDL_RenderPresent(renderer);
 

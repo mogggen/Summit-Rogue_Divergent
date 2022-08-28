@@ -24,13 +24,13 @@ namespace Game
     void CharacterRasterization(SDL_Renderer* renderer, const std::string& c, int X, int Y, const unsigned w=3, const unsigned h=5)
     {
         bool* coordinatesToRender = new bool[15];
-        bool* largeCoordSystem = new bool[15];
+        // bool* largeCoordSystem = new bool[25];
         bool oneLargeBigMac = false;
 
         for (size_t i = 0; i < c.length(); i++)
         {
             coordinatesToRender = new bool[15];
-            largeCoordSystem = new bool[15];
+            // largeCoordSystem = new bool[25];
             oneLargeBigMac = false;
             switch (c.at(i))
             {
@@ -466,25 +466,25 @@ namespace Game
             }
             else
             {
-                SDL_Rect* r = new SDL_Rect[25];
+                // SDL_Rect* r = new SDL_Rect[25];
                 
-                for (size_t y = 0; y < 5; y++)
-                {
-                    for (size_t x = 0; x < 5; x++)
-                    {
-                        if (largeCoordSystem[y * w + x])
-                        {
-                            r[y * w + x].x = X + 20 + x * w;
-                            r[y * w + x].y = Y + 50 + y * h;
-                            r[y * w + x].w = w;
-                            r[y * w + x].h = h;
-                            SDL_RenderFillRect(renderer, &r[y * w + x]);
-                        }
-                    }
-                }
-                X += w * 6;
-                delete[] r;
-                delete[] largeCoordSystem;
+                // for (size_t y = 0; y < 5; y++)
+                // {
+                //     for (size_t x = 0; x < 5; x++)
+                //     {
+                //         if (largeCoordSystem[y * w + x])
+                //         {
+                //             r[y * w + x].x = X + 20 + x * w;
+                //             r[y * w + x].y = Y + 50 + y * h;
+                //             r[y * w + x].w = w;
+                //             r[y * w + x].h = h;
+                //             SDL_RenderFillRect(renderer, &r[y * w + x]);
+                //         }
+                //     }
+                // }
+                // X += w * 6;
+                // delete[] r;
+                // delete[] largeCoordSystem;
             }
         }
     }

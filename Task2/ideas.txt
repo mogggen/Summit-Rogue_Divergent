@@ -7,7 +7,9 @@ Agility =  50-99 // move speed, combat speed, sneak speed, Strength
 Stealth = 0-49 // how close you can approch enemies
 Hunger = 13 // current 
 
-slowly discover these stats of your target (ally or enemy)
+rember more messages if you're more inteligent
+
+slowly discover these stats of your target (ally or enemy) ??
 
 # have a list of enemies that you're going to convince your army to attack
 
@@ -39,3 +41,39 @@ gender of offspring = random(0, male_stats) > random(0, female_stats)
 
 Corpse
 rotting = 1-99 // change of disease (random(0, rotting)
+
+
+***new***
+conditionals
+plotting
+if a is true; then do B
+
+Civilian A to B:
+B condion happening += 0.01
+
+Civilian B to C:
+C condition happening += 0.01
+
+Civilian C to A:
+already has condition
+og condition happening += 0.01
+
+
+message sender
+message receiver
+message timestamp (SDL_getticks())
+message condition
+message source
+
+condition
+item A
+conditonal assesment
+item B
+source [sender]
+[optional] evidence
+helper []
+
+recent news is more valued
+frequent news is more valued
+
+people that deliver news that doesn't meet this requirement is regarded as lesser beings (=Jerrys)

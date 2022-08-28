@@ -4,6 +4,38 @@
 
 namespace Game
 {
+	// ENTANGLEMENTS (person to person contact)
+	// sex
+	// assassination
+	// membership
+	// sleep
+
+	// ITEMS
+	// firearms
+	// ammunition
+	// food
+	// currencies
+	// axe
+	// hoe
+	// clothes
+	// vehicles
+	// buildings
+	// wood
+	// bricks
+	// smelter
+	// corpse
+
+	// OPERATIONS
+	// trade items
+	// transfer of ownership
+	// consumtion
+	// write letters
+
+	// messages
+	// location of item relative to other item
+	// person's stats relative to another person
+	// conditional (a state is achived that is promised a response)
+
 	int currentDay = 0;
 	int dayDuration = 10000;
 	int nextDay;
@@ -23,6 +55,7 @@ namespace Game
 	int py = windowHeight / 2;
 	int v = 5;
 
+	std::vector<int> grassMapX, grassMapY;
 	std::vector<int> chunkId;
 
 	std::vector<int> posX;
@@ -33,8 +66,11 @@ namespace Game
 	std::vector<int> accY;
 
 	std::vector<bool> isGay;
-	std::vector<bool> ageOfAdulthood;
 	std::vector<bool> isMale;
+
+	std::vector<int> pregnancyDuration;
+	std::vector<int> age;
+	std::vector<int> ageOfAdulthood;
 
 	std::vector<int> agility; // ?
 	std::vector<int> stealth;
@@ -56,6 +92,12 @@ namespace Game
 	// corpses
 	std::vector<int> rotting;
 
+	// facts vs rumors
+	std::vector<int> itemEdibility;
+	std::vector<int> itemDurability;
+	std::vector<int> itemUtility;
+	std::vector<bool> itemCurrency;
+
 	enum Sanctions
 	{
 		Oligarchs,
@@ -63,6 +105,16 @@ namespace Game
 		Military,
 		Agriculture
 	};
+
+	void procreate(unsigned fatherIndex, unsigned motherIndex)
+	{
+		int timeUntilbaby = SDL_GetTicks() + 9000;
+		posX.push_back(posX[motherIndex]);
+		posY.push_back(posY[motherIndex]);
+		age.push_back(0);
+		ageOfAdulthood.push_back(rand() % 10 + 15);
+		// agility.push_back();
+	}
 
 	void renderCircle(SDL_Renderer *renderer, float cx, float cy, float radius)
 	{
@@ -185,13 +237,17 @@ namespace Game
 			
 			if (sqrtf(powf(posX[sanction_index[i] - px], 2) + powf(posY[sanction_index[i]] - py, 2)) > detection_range)
 			{
+				// work
 				posX[sanction_index[i]] += (localX - posX[sanction_index[i]]) * travelSpeed;
 				posY[sanction_index[i]] += (localY - posY[sanction_index[i]]) * travelSpeed;
+
 			}
 			else
 			{
-				posX[sanction_index[i]] = rand();
-				posY[sanction_index[i]] = rand();
+				// procreate
+				// procreate(mom, dad);
+				posX[sanction_index[i]] = rand() % windowWidth;
+				posY[sanction_index[i]] = rand() % windowHeight;
 			}
 			// }
 		}
