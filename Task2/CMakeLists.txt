@@ -1,11 +1,25 @@
 cmake_minimum_required(VERSION 3.7)
 project(SDL2Test)
 
-find_package(SDL2 REQUIRED)
-include_directories(SDL2Test ${SDL2_INCLUDE_DIRS})
+set(CMAKE_BUILD_TYPE Debug)
 
-add_executable(SDL2Test 
+if (UNIX AND NOT APPLE)
+    add_executable(SDL2Test
+    main.cc
+    consoleMain.h
+    main.h
+    hardcodedRaster.h)
+
+    find_package(SDL2 REQUIRED)
+    include_directories(SDL2Test ${SDL2_INCLUDE_DIRS})
+    target_link_libraries(SDL2Test ${SDL2_LIBRARIES})
+endif (UNIX AND NOT APPLE)
+
+if (WIN32)
+add_executable(SDL2Test
 main.cc
-main.h
-hardcodedRaster.h)
-target_link_libraries(SDL2Test ${SDL2_LIBRARIES})
+consoleMain.h)
+endif(WIN32)
+
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT app)
+

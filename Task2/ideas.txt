@@ -33,6 +33,8 @@ if (Hunger == 0)
 # stays put and contributes with it's stats 2 fold to the group
 # when plenty of one sanction (or multiple ones die) is usually when revelotion starts if they where close to dissatisfaction
 
+if the most popular has low reputation, less then 50
+other people will try the assassinate them.
 
 attractiveness = average of all stats
 

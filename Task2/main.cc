@@ -2,123 +2,19 @@
 #include <vector>
 #include <ctime>
 #include <cmath>
-#include <getopt.h>
-#include "SDL.h"		// https://trenki2.github.io/blog/2017/06/02/using-sdl2-with-cmake/
-#include "main.h"
-#include "hardcodedRaster.h"
+#include "consoleMain.h"
+//#ifndef WIN32
+//#include <getopt.h>
+//#include "SDL.h"		// https://trenki2.github.io/blog/2017/06/02/using-sdl2-with-cmake/
+//#include "main.h"
+//#include "hardcodedRaster.h"
+//#endif
 
-using namespace Game;
-
-void place_grass(SDL_Renderer* renderer)
-{
-
-}
-
-void animated_grass(SDL_Renderer* renderer, int rootX = windowWidth / 2, int rootY = windowHeight / 2)
-{
-	bool* coordinatesToRender = new bool[49];
-
-	switch ((SDL_GetTicks() / 1000) % 6)
-	{
-	case 0:
-		coordinatesToRender = new bool[49]
-		{
-			0, 0, 0, 0, 0, 0, 0,
-			1, 0, 0, 0, 0, 0, 0,
-			1, 0, 0, 0, 0, 0, 0,
-			1, 0, 0, 0, 0, 1, 0,
-			0, 1, 0, 0, 1, 0, 0,
-			0, 0, 1, 0, 1, 0, 0,
-			0, 0, 0, 1, 0, 0, 0,
-		};
-		break;
-	case 1:
-		coordinatesToRender = new bool[49]
-		{
-			0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0,
-			0, 0, 1, 0, 0, 1, 0,
-			0, 1, 0, 0, 0, 1, 0,
-			0, 1, 0, 0, 1, 0, 0,
-			1, 0, 0, 1, 0, 0, 0,
-			1, 1, 1, 0, 0, 0, 0,
-		};
-		break;
-	case 2:
-		coordinatesToRender = new bool[49]
-		{
-			0, 0, 0, 0, 0, 1, 0,
-			1, 0, 0, 0, 0, 1, 0,
-			1, 0, 0, 0, 0, 1, 0,
-			1, 0, 0, 0, 0, 1, 0,
-			0, 1, 1, 0, 1, 0, 0,
-			0, 0, 0, 1, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0,
-		};
-		break;
-	case 3:
-		coordinatesToRender = new bool[49]
-		{
-			1, 0, 0, 0, 0, 0, 0,
-			1, 0, 1, 0, 0, 0, 0,
-			1, 0, 1, 0, 0, 0, 0,
-			1, 0, 1, 0, 0, 0, 0,
-			0, 1, 0, 1, 0, 0, 0,
-			0, 0, 1, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0,
-		};
-		break;
-	case 4:
-		coordinatesToRender = new bool[49]
-		{
-			0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 1, 0,
-			0, 0, 0, 0, 0, 1, 0,
-			0, 0, 0, 0, 0, 1, 0,
-			0, 0, 1, 0, 0, 1, 0,
-			0, 0, 1, 0, 1, 0, 0,
-			0, 0, 0, 1, 0, 0, 0,
-		};
-		break;
-	case 5:
-		coordinatesToRender = new bool[49]
-		{
-			0, 0, 0, 0, 0, 0, 0,
-			0, 1, 0, 0, 0, 1, 0,
-			0, 1, 0, 0, 0, 1, 0,
-			0, 1, 0, 0, 0, 1, 0,
-			0, 1, 0, 0, 0, 1, 0,
-			0, 0, 1, 0, 1, 0, 0,
-			0, 0, 0, 1, 0, 0, 0,
-		};
-		break;
-	default:
-		exit(100);
-		break;
-	}
-	SDL_SetRenderDrawColor(renderer, 0, 140, 0, 0);
-	SDL_Rect* r = new SDL_Rect[49];
-	int w = 5, h = 5;
-	for (size_t y = 0; y < 7; y++)
-	{
-		for (size_t x = 0; x < 7; x++)
-		{
-			if (coordinatesToRender[y * w + x])
-			{
-				r[y * w + x].x = rootX + x * 7;
-				r[y * w + x].y = rootY + y * 7;
-				r[y * w + x].w = w;
-				r[y * w + x].h = h;
-				SDL_RenderFillRect(renderer, &r[y * w + x]);
-			}
-		}
-	}
-	delete r;
-}
+//using namespace Game;
 
 int main(int argc, char* argv[])
 {
-	int c;
+	/*int c;
 	while((c = getopt(argc, argv, "dr")) != -1)
 	{
 		switch (std::tolower(c))
@@ -135,7 +31,7 @@ int main(int argc, char* argv[])
 			printf("display help");
 			break;
 		}
-	}
+	}*/
 
 	// go to bed whithin a span of a day in in-game time, and receive a boost in stats as you're "visited by a sanction of your pick", that increments and decrements certain values
 	// undersleeping grants respect, oversleeping does the opposite
@@ -147,18 +43,21 @@ int main(int argc, char* argv[])
 	// 
 	// generate resources when they are needed for performance: a resource is spawn at the location randomly picked by the entity/updateLogic (longer away => less likely to spawn)
 
-	bool isInMenu = true;
 	srand((unsigned)time(nullptr));
-	bool quit = false;
+#ifdef WIN32
+	gameLoopConsole();
+#endif
+#ifdef __linux
 	SDL_Init(SDL_INIT_EVERYTHING);
 	SDL_Event event;
 	SDL_Window *window = SDL_CreateWindow("title", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, SDL_WINDOW_SHOWN);
 	SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, 0);
-
 	int frameDelay = 17;
 
 	spawnEntities(10);
 
+	bool isInMenu = true;
+	bool quit = false;
 	bool up = false, down = false, left = false, right = false;
 
 	float aim = 0;
@@ -298,7 +197,8 @@ int main(int argc, char* argv[])
 		{
 			// items = currentDay / 7;
 			// maybe try activating all items directly, let the number of items gro proportional
-			CharacterRasterization(renderer, "NEW ITEM", windowWidth - 100, windowHeight / 2 - 100);
+			// use a hot key to display the inventory of the player along the left side of the window
+			// CharacterRasterization(renderer, "NEW ITEM", windowWidth - 100, windowHeight / 2 - 100);
 		}
 
 		SDL_RenderPresent(renderer);
@@ -310,5 +210,6 @@ int main(int argc, char* argv[])
 
 	SDL_DestroyWindow(window);
 	SDL_DestroyRenderer(renderer);
+#endif
 	return 0;
 }

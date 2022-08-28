@@ -1,7 +1,7 @@
 #pragma once
 // sigh make your own raster or just hard-code every letter
 //#include <SDL_ttf.h>	// https://www.youtube.com/watch?v=1tBzIhVgR7E
-
+#include <vector>
 namespace Game
 {
 	// ENTANGLEMENTS (person to person contact)
