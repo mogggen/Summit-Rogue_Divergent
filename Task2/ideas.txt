@@ -12,7 +12,10 @@ rember more messages if you're more inteligent
 slowly discover these stats of your target (ally or enemy) ??
 
 # have a list of enemies that you're going to convince your army to attack
-
+* Bounties
+* Witches
+* Stories of people doing things
+* add messages to stories
 
 if (Hunger < 50)
 # willing to join the army
