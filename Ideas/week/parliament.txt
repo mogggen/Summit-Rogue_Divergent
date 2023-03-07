@@ -1,0 +1,19 @@
+random value assignment (1-100)
+first time opinion change (100%)
+second time opinion change (50%)
+third time opinion change (33%)
+fourth time opinion change (25%)
+fifth time opinion change (20%)
+sixth time opinion change (17%)
+seventh time opinion change (14%)
+eigth time opinion change (12%)
+nine time opinion change (11%)
+tenth time opinion change (10%)
+...
+
+voting out of range will discard that vote
+
+a NPC can vote for the price of three votes
+
+
+"but that we voted for this! not with our rigged elections but with out things, our properties, our money. I'm not saying anything new we all know why we all know why we do this it's not because Hunger Games books makes us happy, but because we want to be sedated. Because it's not to pretend because we're cowards, fuck society" - Elliot Alderson

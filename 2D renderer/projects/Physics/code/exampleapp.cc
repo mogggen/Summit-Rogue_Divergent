@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 #include "config.h"
 #include "imgui.h"
-#include "stb_image.h"
+//#include "stb_image.h"
 #include "exampleapp.h"
 #include <iostream>
 #include <fstream>
@@ -103,8 +103,7 @@ namespace Example
 			fireHydrantScript->getShaderResource(this->vertexShader, this->pixelShader, this->program);
 
 			// Actor
-			Actor temp;
-			Actor *fireHydrantActor = &temp;
+			Actor *fireHydrantActor = new Actor();
 
 			// GraphicNode
 			fireHydrant = std::make_shared<GraphicNode>(fireHydrantMesh, fireHydrantTexture, fireHydrantScript, fireHydrantActor);
@@ -143,6 +142,49 @@ namespace Example
 		return false;
 	}
 
+	inline bool sphereTrigger(const V2& a, const V2& b, const float& radius)
+	{
+		if (radius <= 0)
+		{
+			printf("sphereTrigger: radius is invalid.\n");
+		}
+		return sqrtf((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y)) < radius;
+	}
+
+	inline bool squreTrigger(const V2& lhsPos, const V2& lhsSize, const V2& rhsPos, const V2& rhsSize)
+	{
+		if (lhsSize.x <= 0 &&
+			lhsSize.y <= 0 &&
+			rhsSize.x <= 0 &&
+			rhsSize.y <= 0)
+		{
+			printf("squareTrigger: size is invalid.\n");
+			exit(1);
+		}
+		return 
+			lhsPos.x + lhsSize.x >= rhsPos.x - rhsSize.x ||
+			lhsPos.x - lhsSize.x < rhsPos.x + rhsSize.x ||
+			lhsPos.y + lhsSize.y >= rhsPos.y - rhsSize.y ||
+			lhsPos.y - lhsSize.y < rhsPos.y + rhsSize.y;
+	}
+
+	void decceleratingAnimation(V2& current, const V2& target, const float& delta=0.01f)
+	{
+		if (sphereTrigger(current, target, delta * 100.f))
+		{
+			current = target;
+			return;
+		}
+		current += (target - current) * delta;
+	}
+
+	// check conditions that depend on this value
+	inline void getEffectedConditions()
+	{
+		// loop the globals checking if there are conditions
+		// checking the conditions if there were any
+	}
+
 	//------------------------------------------------------------------------------
 	/**
 	 */
@@ -153,62 +195,34 @@ namespace Example
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LEQUAL);
 
-		// gravity
-		const float g = -9.806e-3f;
-
 		Camera cam(90, (float)width / height, 0.01f, 100.0f);
-		cam.setPos(V4(0, 4, 3));
+		cam.setPos(V4(0, 0, 30));
 		cam.setRot(V4(0, 1, 0), M_PI);
 
 		Lightning light(V3(10, 10, 10), V3(1, 1, 1), .01f);
-		// Debug::DrawLine(V3(10, 10, 10), V3(1, 1, 1), (V3(0, 1, 0)));
 		float camSpeed = .08f;
 
 		// set identies
 		fireHydrantWorldSpaceTransform = fireHydrantProjectionViewTransform = Translate(V4());
 		
-		cubeWorldSpaceTransform = cubeProjectionViewTransform = Translate(V4());
-
-		M4 quadWorldSpaceTransform[100];
-		M4 quadProjectionViewTransform[100];
-		for (size_t i = 0; i < 10; i++)
-		{
-			for (size_t j = 0; j < 10; j++)
-			{
-				quadWorldSpaceTransform[i * 10 + j] = quadProjectionViewTransform[i] = Translate(V4());
-				quadWorldSpaceTransform[i * 10 + j] = Translate(V4(i * 2, j * 2, 0));
-			}
-		}
+		cubeWorldSpaceTransform = Translate(V4(0, 0, 0));
+		M4 cubeWorldSpaceTransform2 = Translate(V4(0, 0, 0));
+		cubeProjectionViewTransform = Translate(V4());
+		M4 cubeProjectionViewTransform2 = Translate(V4());
 
 		while (this->window->IsOpen())
 		{
-			//--------------------ImGui section--------------------
-
 			auto start = std::chrono::high_resolution_clock::now();
 
-			//--------------------math section--------------------
-			cam.setPos(cam.getPos() + Normalize(V4((d - a), (q - e), (w - s))) * -camSpeed);
-			plane = new Plane(V3(5, 4, 0), V3(0, 0, -1));
-			// std::cout << "frame " << frameIndex << std::endl;
+			cam.setPos(cam.getPos() + Normalize(V4(d - a, s - w, 0)) * -camSpeed);
 
-			// fireHydrant->getTexture()->LoadFromFile();
-
-			// Implement a gravitational acceleration on the fireHydrant
-			// fireHydrant->actor->velocity = fireHydrant->actor->velocity + fireHydrant->actor->mass * g;
-
-			// fireHydrant world space
-			// fireHydrantWorldSpaceTransform = fireHydrantWorldSpaceTransform *
-			// Translate(V4(0, -1, 0) * fireHydrant->actor->velocity);
-
-			// fireHydrant view space
-			// fireHydrantProjectionViewTransform = cam.pv() * fireHydrantWorldSpaceTransform * Scalar(V4(.1, .1, .1));
-
-			// cube world space
 			cubeWorldSpaceTransform = cubeWorldSpaceTransform *
-									  Translate(V4(0, 0, cos(frameIndex / 20.f)));
+									  Translate(Normalize(V4(a - d, w - s, 0)) * -camSpeed);
 
-			// // cube view space
+			// cube view space
 			cubeProjectionViewTransform = cam.pv() * cubeWorldSpaceTransform;
+			cubeProjectionViewTransform2 = cam.pv() * cubeWorldSpaceTransform2;
+
 
 			// equation
 			double mouseWorldX, mouseWorldY;
@@ -216,47 +230,22 @@ namespace Example
 			if (isPressed)
 			{
 				glfwGetCursorPos(this->window->GetHandle(), &mouseWorldX, &mouseWorldY);
-				mouseWorldX = (mouseWorldX / this->width);
-				mouseWorldY = (mouseWorldY / this->width);
-				// std::cout << "x:" << mouseWorldX << " y:" << mouseWorldY << std::endl;
-
-				// shot a ray
-				Ray r(cam.getPos(), V3(mouseWorldX, 0, mouseWorldY));
-
-				V3 res;
-				if (r.Intersect(res, *plane))
-				{
-					std::cout << r.dir.x << r.dir.y << r.dir.z << std::endl;
-					// std::cout << "hit at" << res.x << "," << res.y << "," << res.z << std::endl;
-				}
+				
+				std::cout << "x:" << mouseWorldX << " y:" << mouseWorldY << std::endl;
 			}
 
-			for (size_t i = 0; i < 100; i++)
-			{
-				quadProjectionViewTransform[i] = cam.pv() * quadWorldSpaceTransform[i];
-			}
-
-			//--------------------real-time render section--------------------
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			// fireHydrantScript->setM4(cam.pv(), "m4ProjViewPos");
 			cubeScript->setM4(cam.pv(), "m4ProjViewPos");
 
-			light.bindLight(fireHydrantScript, cam.getPos());
-			fireHydrant->DrawScene(fireHydrantProjectionViewTransform, fireHydrantColor);
+			//light.bindLight(fireHydrantScript, cam.getPos());
+			//fireHydrant->DrawScene(fireHydrantProjectionViewTransform, fireHydrantColor);
 
 			light.bindLight(cubeScript, cam.getPos());
 			cube->DrawScene(cubeProjectionViewTransform, cubeColor);
+			cube->DrawScene(cubeProjectionViewTransform2, cubeColor);
 
-			//for (int i = 0; i < 100; i++)
-			//{
-			//	if (plane->pointIsOnPlane(quadWorldSpaceTransform[i].toV3(), plane->MARGIN))
-			//	{
-			//		cube->DrawScene(quadProjectionViewTransform[i], fireHydrantColor);
-			//	}
-			//}
-
-			// usleep(10000);
 			this->window->Update();
 			frameIndex++;
 
@@ -266,7 +255,7 @@ namespace Example
 	}
 
 	// introduction
-	// the society of these NPCs are a mess everyone is always blaming everyone else for not doing their job right
+	// the society of these NPCs are a mess. everyone is always blaming everyone else for not doing their job right
 	// and terrorism, murder, stealing will take down even the best of the best.
 	// how long will you manage to dodge the crossfire
 	//
@@ -328,6 +317,7 @@ namespace Example
 	// wealth
 	// health
 	// loving
+	// social
 	// (is only used for conditionals in a completly arbitrary facion)
 	//
 	// pegged item
@@ -354,12 +344,16 @@ namespace Example
 		ImGui::Text("Name: %s", "Hello");
 		ImGui::Text("Occupation: %s", "factory");
 
-		ImGui::Text("morale: %d", );
-		ImGui::Text("sanity: %d", );
-		ImGui::Text("wealth: %d", );
-		ImGui::Text("health: %d", );
-		ImGui::Text("loving: %d", );
-
+		ImGui::Text("morale: %d", 0);
+		ImGui::Text("sanity: %d", 0);
+		ImGui::Text("wealth: %d", 0);
+		ImGui::Text("health: %d", 0);
+		ImGui::Text("loving: %d", 0);
+		ImGui::Text("");
+		ImGui::Text("year:   %d", 0);
+		ImGui::Text("--time stats--");
+		ImGui::Text("Total: %d", 0);
+		ImGui::Text("Active: %d", 0);
 		//ImGui::Text("frames: %d %.0f", frameIndex, (float)1e6 / duration);
 		ImGui::End();
 	}

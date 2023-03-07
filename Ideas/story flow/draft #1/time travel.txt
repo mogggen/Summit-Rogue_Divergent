@@ -1,0 +1,3 @@
+when killing a NPC you will travel to that NPC's birth day, controlling that NPC
+
+conceving a NPC with a partner will send you forward in time by 

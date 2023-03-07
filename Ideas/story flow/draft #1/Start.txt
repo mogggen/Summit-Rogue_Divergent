@@ -1,0 +1,2 @@
+The game start's when you terminate the NPC right in front of the player
+Sending the player of into a diffrent time

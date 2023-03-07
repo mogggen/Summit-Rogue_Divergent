@@ -1,0 +1,5 @@
+todo:
+keep working on the game to make it somewhat playable
+
+
+move Sammes project to github from ONLY local copy! (important)

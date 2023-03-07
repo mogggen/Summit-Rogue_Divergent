@@ -9,7 +9,6 @@
 #include <functional>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include <nanovg.h>
 #include <string>
 
 namespace Display
@@ -59,8 +58,6 @@ public:
 
 	/// set optional UI render function
 	void SetUiRender(const std::function<void()>& func);
-	/// set optional nanovg render function
-	void SetNanoVGRender(const std::function<void(NVGcontext *)> & func);
 
 
 private:
@@ -95,15 +92,12 @@ private:
 	std::function<void(float64, float64)> mouseScrollCallback;
 	/// function for ui rendering callback
 	std::function<void()> uiFunc;
-	/// function for nanovg rendering callback
-	std::function<void(NVGcontext *)> nanoFunc;
 
 
 	int32 width;
 	int32 height;
 	std::string title;
 	GLFWwindow* window;
-	NVGcontext * vg;
 };
 
 //------------------------------------------------------------------------------
@@ -213,14 +207,5 @@ inline void
 Window::SetUiRender(const std::function<void()>& func)
 {
 	this->uiFunc = func;
-}
-
-//------------------------------------------------------------------------------
-/**
-*/
-inline void
-Window::SetNanoVGRender(const std::function<void(NVGcontext *)> & func)
-{
-	this->nanoFunc = func;
 }
 } // namespace Display

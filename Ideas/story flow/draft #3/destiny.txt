@@ -1,0 +1,189 @@
+
+Idea "fixing time travel charges"
+
+using simple parity math to predict the end of the game. and reveal it to the player at the start.
+
+just like how stockfish knows that you are garanteed to get mated in X moves,
+you still feel like you have a chance to prevent the outcome, you might not even see it.
+until it is right infront of you, and way to late to avoid.
+
+what if instead of certain games of chess being doomed.
+what if ALL the games were rigged to be forced checkmate in X moves?
+
+
+now how would one go about this in practice
+
+rules and legal moves are what determines the outcome of any chess position.
+so let's make some rules for this game
+
+there is a point in space time, easy enough
+
+this point stores information about the current state of the world at this time
+
+why would you want to move in time?
+conflict the game won't have a legal system set in place, just bad actors.
+these criminals will slaughter anyone, steal anything, vote selfishly, ruin the economy.
+actually any actor given the opertunity, will mostly likely perform one or multiple crimes,
+if they belive they will get away with it
+
+motivations:
+"the opertunity makes the theif"
+"emergencies has no law"
+
+
+Draft #3.1
+simple, boring solution:
+create a utopia without criminals
+
+this won't be possible since there is an incentive to be neferious, because it requires less work.
+
+Draft #3.2.2
+when not all timelines can form a tree (or a forest)
+
+Scenario #1: game over.
+Scenario #2: something else entirely.
+
+Draft #3.2.1
+develop a series of ideas that shape a game that every non-linearly is technically a "checkmate"
+
+like the "how predictable are you" solution.
+(like having certain rifts open so that you can only walk into the ones that seals your destiny,
+the other ones will be out of reach and you won't be able to reach them in time.
+but somehow the game will be convincing enough to make you believe that you can.)
+
+or the "chess engine" solution.
+
+or use the determenistic, yet random, utilities of 3x + 1
+
+or a combination of any of the select few.
+
+or find even more material that could be implemented and improved to match the theme.
+
+
+The character
+this will be a single player game set in a finite space, let's say 64 squares
+
+# scenario 1 LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL
+
+setup:
+maybe start with a 4x4
+and 3 actors
+and 4 time travel charges (?)
+a voting station
+viewing range of 2, else fog of war
+any actor can perform a kill (let's say that they don't require a weapon to do so just yet)
+
+----
+ X
+   P
+O
+----
+
+the viewing range, in this version's primal state, is to determine if a actor can spot a murder
+
+let's say actor P murders actor X, unbeknownst to actor O you are currently playing as actor O
+
+perspective: actor O
+
+see nothing in particular, until the actor makes a innocent stroll around the game world.
+and sees actor P standing close to a body.
+
+actor P disappeared infront of actor O, where did actor P go?
+
+perspective: actor P
+
+actor P ends up where actor X was birthed, as actor X
+
+everything is diffrent here, this is the origin story of actor X
+
+version 1: it either existed during the world generation,
+version 2: or was generated to fit the present of actor O in some fashion
+time to begin your new life in this past world,
+you can kill yourself to death out of there to to keep traveling back in time
+(murder a woman if you want the possibility of traveling to their children's adulencence, of course :))
+
+(the deterministic algorithm can generate any number of past realities as long as they end up
+in the same place in time)
+
+go forward as actor X and hope for a better RNG with a larger civilazation that ends up dying of just faster.
+
+perspective: actor X (dead)
+
+the possibilities of actor X are slim, this version of actor X will for all forseable future be dead.
+but some actor could kill actor P and in that new timeline create a reality where actor X is alive.
+
+(?) time travel charges: there are a fixed amount in circulation over all of the entire game
+
+constants:
+time charges have a spawn point in space, and time.
+infinite duplication glitch must be fixed. (or illegal move orders)
+
+functionality: 1 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+the time charge has a route, like a bus, where a bus stop is a fragment in space time.
+
+0123456789
+--    - -
+    +-
++++ -+ -
+
+the time travel charges must coninside on the same bus map, the timelines can't contain paradoxes.
+
+functionality: 2 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+charges are used immediately, creating a branch, either forward or backwards in time
+
+merging time travel charges:
+if you can make two (or more) timelines have the same conditions, (at the same time, maybe?) one
+time travel charge will be returned after the merge
+this can be useful to test if a strategy you had in mind was feasable or not.
+
+so if you remembered who was alive and what the prices of the economy was
+and you manage to get it spot on, you will get your time travel charge back.
+
+
+maybe diffrent number amount of things depending on the current difficulty like:
+
+# easy difficulty
+you have to stand in the same spot
+
+# hardest difficulty
+you should have the same inventory
+every actor has to be in the same spot
+every market price must match
+
+# extreme difficulty
+bullet count must match
+
+you can now create a new timeline with the same time travel charge
+
+backwards travel ++++++++++++++++++++++++
+
+you can have 4 timelines running at the same time (one for each travel charge).
+
+killing someone will cause you to travel to their birth and become them.
+spending a time travel charge returning back will cause you to get it back.
+
+or you can live a diffrent life as them.
+or kill you're future murderer. opening a new timeline costing even another time travel charge
+if you kill someone when all time travel charges are depleted, you will just be an og murderer
+so relatives will be mad you're friends will hate you, noone would sell you stuff or visit you.
+
+
+forwards travel +++++++++++++++++++++++++
+if you play as a woman you will be able to have a child, when that child is birthed you will travel
+to the point in time when the child is of the same age as you were when giving birth.
+
+this won't cost a time travel charge (maybe?)
+
+the goal of the game is to travel to a certain year in the future where you're unavoidable doom awaits.
+
+
+now that is one version:
+
+how to compute this?
+easy!
+economy?
+basic ez!
+
+the incentive for actors to behave however, and their capability of time traveling backwards or forwards.
+is redundant because all is needed is to swap the brains if they at least one timeline is active.
+

@@ -10,7 +10,7 @@ void TextureResource::LoadFromFile()
 	{
 		int imgWidth, imgHeight, nrChannels;
 
-		unsigned char* img = stbi_load(file.c_str(), &imgWidth, &imgHeight, &nrChannels, STBI_rgb);
+		unsigned char* img = nullptr;// stbi_load(file.c_str(), &imgWidth, &imgHeight, &nrChannels, STBI_rgb);
 		if (img == nullptr)
 		{
 			printf("Image loaded incorrectly");
