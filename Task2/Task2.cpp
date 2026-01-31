@@ -1,9 +1,11 @@
 #include <iostream>
+#include <string>
 #include <ctime>
 #include "Rectangle.h"
 #include "Circle.h"
 #include "Bullet.h"
 #include "SDL.h"
+#include "SDL_image.h"
 
 float aiming(float px, float py, float mx, float my)
 {
@@ -33,6 +35,33 @@ int main(int argc, char* argv[])
 	SDL_Window *window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, SDL_WINDOW_SHOWN);
 	SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, 0);
 
+	IMG_Init(IMG_INIT_PNG);
+	std::string spriteBase = "resources/sprites/green_boy/";
+	SDL_Texture* walkDown[2] = {
+		IMG_LoadTexture(renderer, (spriteBase + "walk-down-0.png").c_str()),
+		IMG_LoadTexture(renderer, (spriteBase + "walk-down-1.png").c_str())
+	};
+	if (!walkDown[0])
+	{
+		spriteBase = "../resources/sprites/green_boy/";
+		walkDown[0] = IMG_LoadTexture(renderer, (spriteBase + "walk-down-0.png").c_str());
+		walkDown[1] = IMG_LoadTexture(renderer, (spriteBase + "walk-down-1.png").c_str());
+	}
+	if (walkDown[0] && !walkDown[1])
+		walkDown[1] = IMG_LoadTexture(renderer, (spriteBase + "walk-down-1.png").c_str());
+	SDL_Texture* walkUp[2] = {
+		IMG_LoadTexture(renderer, (std::string(spriteBase) + "walk-up-0.png").c_str()),
+		IMG_LoadTexture(renderer, (std::string(spriteBase) + "walk-up-1.png").c_str())
+	};
+	SDL_Texture* walkLeft[2] = {
+		IMG_LoadTexture(renderer, (std::string(spriteBase) + "walk-left-0.png").c_str()),
+		IMG_LoadTexture(renderer, (std::string(spriteBase) + "walk-left-1.png").c_str())
+	};
+	SDL_Texture* walkRight[2] = {
+		IMG_LoadTexture(renderer, (std::string(spriteBase) + "walk-right-0.png").c_str()),
+		IMG_LoadTexture(renderer, (std::string(spriteBase) + "walk-right-1.png").c_str())
+	};
+
 	int frameDelay = 17;
 
 	int mx = 0;
@@ -50,6 +79,12 @@ int main(int argc, char* argv[])
 	int fireDelay = 0;
 
 	bool up = false, down = false, left = false, right = false;
+
+	// Walk animation: 0=down, 1=up, 2=left, 3=right
+	int lastFacing = 0;
+	int walkAnimFrame = 0;
+	Uint32 lastWalkAnimTime = 0;
+	const Uint32 walkAnimInterval = 120;
 
 	int vv = 0;
 	int a = 3;
@@ -222,6 +257,24 @@ int main(int argc, char* argv[])
 		if (left && px >= 0) px -= v;
 		if (right && px < windowWidth - s) px += v;
 
+		// Update facing and walk animation frame
+		bool isWalking = up || down || left || right;
+		if (isWalking)
+		{
+			if (down) lastFacing = 0;
+			else if (up) lastFacing = 1;
+			else if (left) lastFacing = 2;
+			else if (right) lastFacing = 3;
+			Uint32 now = SDL_GetTicks();
+			if (now - lastWalkAnimTime >= walkAnimInterval)
+			{
+				lastWalkAnimTime = now;
+				walkAnimFrame = 1 - walkAnimFrame;
+			}
+		}
+		else
+			walkAnimFrame = 0;
+
 		//checks cursor position (SDL_GetMouseState works on both Windows and Linux)
 		int mouseX, mouseY;
 		SDL_GetMouseState(&mouseX, &mouseY);
@@ -356,27 +409,41 @@ int main(int argc, char* argv[])
 			liveRounds[i]->render(renderer);
 		}
 
-		//head
-		SDL_SetRenderDrawColor(renderer, 150, 50, 99, 0);
-		head->render(renderer);
-
-		//torso
-		SDL_SetRenderDrawColor(renderer, 195, 50, 99, 0);
-		torso->render(renderer);
-
-		//legs
-		SDL_SetRenderDrawColor(renderer, 14, 100, 5, 0);
-		leftLeg->render(renderer);
-		rightLeg->render(renderer);
+		// Player: walk animation sprite (green_boy) or fallback to rectangles
+		SDL_Texture* walkTex = nullptr;
+		switch (lastFacing)
+		{
+		case 0: walkTex = walkDown[walkAnimFrame]; break;
+		case 1: walkTex = walkUp[walkAnimFrame]; break;
+		case 2: walkTex = walkLeft[walkAnimFrame]; break;
+		case 3: walkTex = walkRight[walkAnimFrame]; break;
+		}
+		if (walkTex)
+		{
+			int tw = 0, th = 0;
+			SDL_QueryTexture(walkTex, nullptr, nullptr, &tw, &th);
+			SDL_Rect dst = { (int)px, (int)(py - s), (int)(s * 2), (int)(s * 3) };
+			if (tw > 0 && th > 0)
+				SDL_RenderCopy(renderer, walkTex, nullptr, &dst);
+		}
+		else
+		{
+			// Fallback: draw rectangles if textures failed to load
+			SDL_SetRenderDrawColor(renderer, 150, 50, 99, 0);
+			head->render(renderer);
+			SDL_SetRenderDrawColor(renderer, 195, 50, 99, 0);
+			torso->render(renderer);
+			SDL_SetRenderDrawColor(renderer, 14, 100, 5, 0);
+			leftLeg->render(renderer);
+			rightLeg->render(renderer);
+			SDL_SetRenderDrawColor(renderer, 18, 120, 55, 0);
+			leftArm->render(renderer);
+			rightArm->render(renderer);
+		}
 
 		//rifle
 		SDL_SetRenderDrawColor(renderer, 255, 171, 171, 0);
 		rifle->render(renderer);
-
-		//arms
-		SDL_SetRenderDrawColor(renderer, 18, 120, 55, 0);
-		leftArm->render(renderer);
-		rightArm->render(renderer);
 
 		//hud
 		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 0);
@@ -434,6 +501,15 @@ int main(int argc, char* argv[])
 	{
 		delete tables[i];
 	}
+
+	for (int i = 0; i < 2; i++)
+	{
+		if (walkDown[i]) SDL_DestroyTexture(walkDown[i]);
+		if (walkUp[i]) SDL_DestroyTexture(walkUp[i]);
+		if (walkLeft[i]) SDL_DestroyTexture(walkLeft[i]);
+		if (walkRight[i]) SDL_DestroyTexture(walkRight[i]);
+	}
+	IMG_Quit();
 
 	SDL_DestroyWindow(window);
 	SDL_DestroyRenderer(renderer);
