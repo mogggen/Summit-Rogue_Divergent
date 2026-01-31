@@ -35,20 +35,24 @@ int main(int argc, char* argv[])
 	SDL_Window *window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, SDL_WINDOW_SHOWN);
 	SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, 0);
 
-	IMG_Init(IMG_INIT_PNG);
-	std::string spriteBase = "resources/sprites/green_boy/";
+	IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG);
+	std::string resourceDir = "resources/";
+	SDL_Texture* mapTexture = IMG_LoadTexture(renderer, (resourceDir + "map.jpg").c_str());
+	if (!mapTexture)
+	{
+		resourceDir = "../resources/";
+		mapTexture = IMG_LoadTexture(renderer, (resourceDir + "map.jpg").c_str());
+	}
+	int mapWidth = 0, mapHeight = 0;
+	if (mapTexture)
+		SDL_QueryTexture(mapTexture, nullptr, nullptr, &mapWidth, &mapHeight);
+	const int mapZoom = 5;
+
+	std::string spriteBase = resourceDir + "sprites/green_boy/";
 	SDL_Texture* walkDown[2] = {
 		IMG_LoadTexture(renderer, (spriteBase + "walk-down-0.png").c_str()),
 		IMG_LoadTexture(renderer, (spriteBase + "walk-down-1.png").c_str())
 	};
-	if (!walkDown[0])
-	{
-		spriteBase = "../resources/sprites/green_boy/";
-		walkDown[0] = IMG_LoadTexture(renderer, (spriteBase + "walk-down-0.png").c_str());
-		walkDown[1] = IMG_LoadTexture(renderer, (spriteBase + "walk-down-1.png").c_str());
-	}
-	if (walkDown[0] && !walkDown[1])
-		walkDown[1] = IMG_LoadTexture(renderer, (spriteBase + "walk-down-1.png").c_str());
 	SDL_Texture* walkUp[2] = {
 		IMG_LoadTexture(renderer, (std::string(spriteBase) + "walk-up-0.png").c_str()),
 		IMG_LoadTexture(renderer, (std::string(spriteBase) + "walk-up-1.png").c_str())
@@ -379,9 +383,20 @@ int main(int argc, char* argv[])
 		//	rendering
 		//
 
-		//Background
+		// Background: rolling map (20x zoom, scrolls with player)
 		SDL_SetRenderDrawColor(renderer, 195, 176, 145, 0);
 		SDL_RenderClear(renderer);
+		if (mapTexture && mapWidth > 0 && mapHeight > 0)
+		{
+			// Map drawn 20x size; position scrolls 1:1 with player (rolling background)
+			SDL_Rect mapDest = {
+				(int)(-px),
+				(int)(-py),
+				mapWidth * mapZoom,
+				mapHeight * mapZoom
+			};
+			SDL_RenderCopy(renderer, mapTexture, nullptr, &mapDest);
+		}
 
 		//tables
 		SDL_SetRenderDrawColor(renderer, 120, 80, 39, 0);
@@ -502,6 +517,8 @@ int main(int argc, char* argv[])
 		delete tables[i];
 	}
 
+	if (mapTexture)
+		SDL_DestroyTexture(mapTexture);
 	for (int i = 0; i < 2; i++)
 	{
 		if (walkDown[i]) SDL_DestroyTexture(walkDown[i]);
