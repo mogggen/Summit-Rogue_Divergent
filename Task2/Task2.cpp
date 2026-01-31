@@ -75,6 +75,18 @@ int main(int argc, char* argv[])
 	int v = 5;
 	int s = 30;
 
+	// Scroll only when player reaches screen edge (dead zone)
+	float scrollX = 0, scrollY = 0;
+	const int scrollMargin = 150;
+	int maxScrollX = 0, maxScrollY = 0;
+	if (mapWidth > 0 && mapHeight > 0)
+	{
+		maxScrollX = mapWidth * mapZoom - windowWidth;
+		maxScrollY = mapHeight * mapZoom - windowHeight;
+		if (maxScrollX < 0) maxScrollX = 0;
+		if (maxScrollY < 0) maxScrollY = 0;
+	}
+
 	int heartCount = 3;
 	int ammoCount = 10;
 	bool isReloading = false;
@@ -255,11 +267,39 @@ int main(int argc, char* argv[])
 			jumping = false;
 		}
 
-		//movement
-		if (up && py >= 0) py -= v;
-		if (down && py < windowHeight - s * 3) py += v;
-		if (left && px >= 0) px -= v;
-		if (right && px < windowWidth - s) px += v;
+		// Movement: scroll background only when player hits screen edge
+		if (up)
+		{
+			if (scrollY > 0)
+				scrollY = (scrollY - v > 0) ? scrollY - v : 0;
+			else if (py > scrollMargin)
+				py -= v;
+			else
+				py = scrollMargin;
+		}
+		if (down)
+		{
+			if (py < windowHeight - scrollMargin - s * 3)
+				py += v;
+			else if (scrollY < maxScrollY)
+				scrollY = (scrollY + v < maxScrollY) ? scrollY + v : (float)maxScrollY;
+		}
+		if (left)
+		{
+			if (scrollX > 0)
+				scrollX = (scrollX - v > 0) ? scrollX - v : 0;
+			else if (px > scrollMargin)
+				px -= v;
+			else
+				px = scrollMargin;
+		}
+		if (right)
+		{
+			if (px < windowWidth - scrollMargin - s)
+				px += v;
+			else if (scrollX < maxScrollX)
+				scrollX = (scrollX + v < maxScrollX) ? scrollX + v : (float)maxScrollX;
+		}
 
 		// Update facing and walk animation frame
 		bool isWalking = up || down || left || right;
@@ -388,10 +428,10 @@ int main(int argc, char* argv[])
 		SDL_RenderClear(renderer);
 		if (mapTexture && mapWidth > 0 && mapHeight > 0)
 		{
-			// Map drawn 20x size; position scrolls 1:1 with player (rolling background)
+			// Map drawn 20x size; scrolls only when player reaches screen edge
 			SDL_Rect mapDest = {
-				(int)(-px),
-				(int)(-py),
+				(int)(-scrollX),
+				(int)(-scrollY),
 				mapWidth * mapZoom,
 				mapHeight * mapZoom
 			};
