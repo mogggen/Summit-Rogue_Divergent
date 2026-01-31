@@ -11,8 +11,9 @@ if (UNIX AND NOT APPLE)
     hardcodedRaster.h)
 
     find_package(SDL2 REQUIRED)
-    include_directories(SDL2Test ${SDL2_INCLUDE_DIRS})
-    target_link_libraries(SDL2Test ${SDL2_LIBRARIES})
+    find_package(Curses REQUIRED)
+    include_directories(SDL2Test ${SDL2_INCLUDE_DIRS} ${CURSES_INCLUDE_DIR})
+    target_link_libraries(SDL2Test ${SDL2_LIBRARIES} ${CURSES_LIBRARIES})
 endif (UNIX AND NOT APPLE)
 
 if (WIN32)

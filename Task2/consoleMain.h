@@ -1,5 +1,10 @@
 #include <iostream>
+#ifdef WIN32
 #include <conio.h>
+#endif
+#ifdef __linux
+#include <ncurses.h>
+#endif
 
 //namespace Game
 //{

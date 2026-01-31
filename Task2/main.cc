@@ -3,14 +3,13 @@
 #include <ctime>
 #include <cmath>
 #include "consoleMain.h"
-//#ifndef WIN32
-//#include <getopt.h>
-//#include "SDL.h"		// https://trenki2.github.io/blog/2017/06/02/using-sdl2-with-cmake/
-//#include "main.h"
-//#include "hardcodedRaster.h"
-//#endif
+#ifdef __linux
+#include <SDL.h>
+#include "main.h"
+#include "hardcodedRaster.h"
+#endif
 
-//using namespace Game;
+using namespace Game;
 
 int main(int argc, char* argv[])
 {
