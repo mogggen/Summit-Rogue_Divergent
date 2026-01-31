@@ -75,9 +75,12 @@ int main(int argc, char* argv[])
 	int v = 5;
 	int s = 30;
 
-	// Scroll only when player reaches screen edge (dead zone)
+	// Scroll only when player leaves center zone (free area = width/4 and height/4 from center)
 	float scrollX = 0, scrollY = 0;
-	const int scrollMargin = 150;
+	const int centerZoneLeft   = windowWidth / 4;
+	const int centerZoneRight  = (3 * windowWidth) / 4;
+	const int centerZoneTop    = windowHeight / 4;
+	const int centerZoneBottom = (3 * windowHeight) / 4;
 	int maxScrollX = 0, maxScrollY = 0;
 	if (mapWidth > 0 && mapHeight > 0)
 	{
@@ -267,38 +270,49 @@ int main(int argc, char* argv[])
 			jumping = false;
 		}
 
-		// Movement: scroll background only when player hits screen edge
+		// Movement: free in center zone (width/4, height/4 from center); scroll only outside it.
+		// When moving back towards center, always reduce scroll so camera follows and scroll turns off.
 		if (up)
 		{
-			if (scrollY > 0)
-				scrollY = (scrollY - v > 0) ? scrollY - v : 0;
-			else if (py > scrollMargin)
+			if (py > centerZoneTop)
+			{
 				py -= v;
+				if (scrollY > 0)
+					scrollY = (scrollY - v > 0) ? scrollY - v : 0;
+			}
+			else if (scrollY > 0)
+				scrollY = (scrollY - v > 0) ? scrollY - v : 0;
 			else
-				py = scrollMargin;
+				py = centerZoneTop;
 		}
 		if (down)
 		{
-			if (py < windowHeight - scrollMargin - s * 3)
+			if (scrollY > 0)
+				scrollY = (scrollY - v > 0) ? scrollY - v : 0;
+			else if (py < centerZoneBottom - s * 3)
 				py += v;
 			else if (scrollY < maxScrollY)
 				scrollY = (scrollY + v < maxScrollY) ? scrollY + v : (float)maxScrollY;
+			else
+				py = centerZoneBottom - s * 3;
 		}
 		if (left)
 		{
 			if (scrollX > 0)
 				scrollX = (scrollX - v > 0) ? scrollX - v : 0;
-			else if (px > scrollMargin)
+			else if (px > centerZoneLeft)
 				px -= v;
 			else
-				px = scrollMargin;
+				px = centerZoneLeft;
 		}
 		if (right)
 		{
-			if (px < windowWidth - scrollMargin - s)
+			if (px < centerZoneRight - s)
 				px += v;
 			else if (scrollX < maxScrollX)
 				scrollX = (scrollX + v < maxScrollX) ? scrollX + v : (float)maxScrollX;
+			else
+				px = centerZoneRight - s;
 		}
 
 		// Update facing and walk animation frame
