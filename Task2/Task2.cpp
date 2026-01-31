@@ -452,25 +452,6 @@ int main(int argc, char* argv[])
 			SDL_RenderCopy(renderer, mapTexture, nullptr, &mapDest);
 		}
 
-		//tables
-		SDL_SetRenderDrawColor(renderer, 120, 80, 39, 0);
-		for (int i = 0; i < sizeof(tables) / sizeof(*tables); i++)
-		{
-			tables[i]->render(renderer);
-		}
-
-		//reloading
-		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 0);
-		if (isReloading)
-		{
-			slider->render(renderer);
-			handle->render(renderer);
-		}
-
-		//shadow
-		SDL_SetRenderDrawColor(renderer, 99, 95, 44, 0);
-		shadow->render(renderer);
-
 		//liveRounds
 		SDL_SetRenderDrawColor(renderer, 200, 200, 93, 0);
 		for (int i = 0; i < sizeof(liveRounds) / sizeof(*liveRounds); i++)
@@ -495,24 +476,7 @@ int main(int argc, char* argv[])
 			if (tw > 0 && th > 0)
 				SDL_RenderCopy(renderer, walkTex, nullptr, &dst);
 		}
-		else
-		{
-			// Fallback: draw rectangles if textures failed to load
-			SDL_SetRenderDrawColor(renderer, 150, 50, 99, 0);
-			head->render(renderer);
-			SDL_SetRenderDrawColor(renderer, 195, 50, 99, 0);
-			torso->render(renderer);
-			SDL_SetRenderDrawColor(renderer, 14, 100, 5, 0);
-			leftLeg->render(renderer);
-			rightLeg->render(renderer);
-			SDL_SetRenderDrawColor(renderer, 18, 120, 55, 0);
-			leftArm->render(renderer);
-			rightArm->render(renderer);
-		}
 
-		//rifle
-		SDL_SetRenderDrawColor(renderer, 255, 171, 171, 0);
-		rifle->render(renderer);
 
 		//hud
 		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 0);
@@ -542,22 +506,6 @@ int main(int argc, char* argv[])
 	//	deallocating
 	//
 
-	delete slider;
-	delete handle;
-
-	delete head;
-
-	delete torso;
-
-	delete leftLeg;
-	delete rightLeg;
-
-	delete leftArm;
-	delete rightArm;
-
-	delete rifle;
-
-	delete shadow;
 
 	for (int i = 0; i < sizeof(shells) / sizeof(*shells); i++)
 	{
@@ -566,10 +514,6 @@ int main(int argc, char* argv[])
 		delete liveRounds[i];
 	}
 
-	for (int i = 0; i < sizeof(tables) / sizeof(*shells); i++)
-	{
-		delete tables[i];
-	}
 
 	if (mapTexture)
 		SDL_DestroyTexture(mapTexture);
