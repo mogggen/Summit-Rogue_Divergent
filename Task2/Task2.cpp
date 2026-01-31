@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <vector>
 #include <ctime>
 #include "Rectangle.h"
 #include "Circle.h"
@@ -47,6 +48,20 @@ int main(int argc, char* argv[])
 	if (mapTexture)
 		SDL_QueryTexture(mapTexture, nullptr, nullptr, &mapWidth, &mapHeight);
 	const int mapZoom = 5;
+
+	// Game of Life grid over the map
+	const int cellSize = 32;
+	int worldWidth = (mapWidth > 0 && mapHeight > 0) ? (mapWidth * mapZoom) : windowWidth * 2;
+	int worldHeight = (mapWidth > 0 && mapHeight > 0) ? (mapHeight * mapZoom) : windowHeight * 2;
+	int gridCols = (worldWidth + cellSize - 1) / cellSize;
+	int gridRows = (worldHeight + cellSize - 1) / cellSize;
+	std::vector<std::vector<bool>> grid(gridRows, std::vector<bool>(gridCols, false));
+	std::vector<std::vector<bool>> gridNext(gridRows, std::vector<bool>(gridCols, false));
+
+	SDL_Texture* texAliveCell = IMG_LoadTexture(renderer, (resourceDir + "sprites/alive_cell_yellow.png").c_str());
+	SDL_Texture* texDeadCell  = IMG_LoadTexture(renderer, (resourceDir + "sprites/dead_cell.png").c_str());
+	if (!texAliveCell) texAliveCell = IMG_LoadTexture(renderer, (std::string("../") + resourceDir + "sprites/alive_cell_yellow.png").c_str());
+	if (!texDeadCell)  texDeadCell  = IMG_LoadTexture(renderer, (std::string("../") + resourceDir + "sprites/dead_cell.png").c_str());
 
 	std::string spriteBase = resourceDir + "sprites/green_boy/";
 	SDL_Texture* walkDown[2] = {
@@ -109,6 +124,13 @@ int main(int argc, char* argv[])
 	int a = 3;
 
 	float aim = 0;
+
+	// Game of Life: spawn cells when shooting (left click / hold)
+	int golSpawnOffset = 0;
+	Uint32 lastGolSpawnTime = 0;
+	const Uint32 golSpawnInterval = 80;
+	Uint32 lastGolStepTime = 0;
+	const Uint32 golStepInterval = 200;
 	int floorCount = 1;
 	bool jumping = false;
 	bool floating = false;
@@ -172,15 +194,27 @@ int main(int argc, char* argv[])
 				break;
 
 			case SDL_MOUSEBUTTONDOWN:
-				if (event.button.button == SDL_BUTTON_LEFT && !isReloading)
+				if (event.button.button == SDL_BUTTON_LEFT)
 				{
-					if (ammoCount > 0)
+					// Game of Life: spawn one cell immediately in aim direction
+					float pwX = px + scrollX, pwY = py + scrollY;
+					float wx = pwX + cellSize * SDL_cosf(aim);
+					float wy = pwY + cellSize * SDL_sinf(aim);
+					int gx = (int)(wx / cellSize), gy = (int)(wy / cellSize);
+					if (gx >= 0 && gx < gridCols && gy >= 0 && gy < gridRows)
+						grid[gy][gx] = true;
+					lastGolSpawnTime = SDL_GetTicks();
+					golSpawnOffset = 1;
+					if (!isReloading)
 					{
-						liveRounds[10 - ammoCount]->SetIsFired(true);
-						ammoCount--;
+						if (ammoCount > 0)
+						{
+							liveRounds[10 - ammoCount]->SetIsFired(true);
+							ammoCount--;
+						}
+						else
+							isReloading = true;
 					}
-					else
-						isReloading = true;
 				}
 				break;
 
@@ -343,6 +377,50 @@ int main(int argc, char* argv[])
 		}
 		aim = aiming(px + s + s / 2, py + s, mx, my);
 
+		// Game of Life: spawn cells when left mouse held (stream in aim direction)
+		Uint32 mouseButtons = SDL_GetMouseState(nullptr, nullptr);
+		if (mouseButtons & SDL_BUTTON_LMASK)
+		{
+			Uint32 now = SDL_GetTicks();
+			if (now - lastGolSpawnTime >= golSpawnInterval)
+			{
+				lastGolSpawnTime = now;
+				float pwX = px + scrollX, pwY = py + scrollY;
+				float wx = pwX + (golSpawnOffset + 1) * cellSize * SDL_cosf(aim);
+				float wy = pwY + (golSpawnOffset + 1) * cellSize * SDL_sinf(aim);
+				int gx = (int)(wx / cellSize);
+				int gy = (int)(wy / cellSize);
+				if (gx >= 0 && gx < gridCols && gy >= 0 && gy < gridRows)
+					grid[gy][gx] = true;
+				golSpawnOffset++;
+			}
+		}
+		else
+			golSpawnOffset = 0;
+
+		// Game of Life: next generation (double buffer)
+		Uint32 nowGol = SDL_GetTicks();
+		if (nowGol - lastGolStepTime >= golStepInterval)
+		{
+			lastGolStepTime = nowGol;
+			for (int gy = 0; gy < gridRows; gy++)
+				for (int gx = 0; gx < gridCols; gx++)
+				{
+					int alive = 0;
+					for (int dy = -1; dy <= 1; dy++)
+						for (int dx = -1; dx <= 1; dx++)
+							if (dx != 0 || dy != 0)
+							{
+								int ny = gy + dy, nx = gx + dx;
+								if (ny >= 0 && ny < gridRows && nx >= 0 && nx < gridCols && grid[ny][nx])
+									alive++;
+							}
+					bool cur = grid[gy][gx];
+					gridNext[gy][gx] = (cur && (alive == 2 || alive == 3)) || (!cur && alive == 3);
+				}
+			grid.swap(gridNext);
+		}
+
 		//
 		//	Reloading
 		//
@@ -452,6 +530,25 @@ int main(int argc, char* argv[])
 			SDL_RenderCopy(renderer, mapTexture, nullptr, &mapDest);
 		}
 
+		// Game of Life grid: draw cells over the map (alive = yellow, dead = dead_cell)
+		SDL_Texture* cellTex = nullptr;
+		for (int gy = 0; gy < gridRows; gy++)
+		{
+			for (int gx = 0; gx < gridCols; gx++)
+			{
+				float sx = gx * cellSize - scrollX;
+				float sy = gy * cellSize - scrollY;
+				if (sx + cellSize < 0 || sx > windowWidth || sy + cellSize < 0 || sy > windowHeight)
+					continue;
+				cellTex = grid[gy][gx] ? texAliveCell : texDeadCell;
+				if (cellTex)
+				{
+					SDL_Rect dst = { (int)sx, (int)sy, cellSize, cellSize };
+					SDL_RenderCopy(renderer, cellTex, nullptr, &dst);
+				}
+			}
+		}
+
 		//liveRounds
 		SDL_SetRenderDrawColor(renderer, 200, 200, 93, 0);
 		for (int i = 0; i < sizeof(liveRounds) / sizeof(*liveRounds); i++)
@@ -517,6 +614,10 @@ int main(int argc, char* argv[])
 
 	if (mapTexture)
 		SDL_DestroyTexture(mapTexture);
+	if (texAliveCell)
+		SDL_DestroyTexture(texAliveCell);
+	if (texDeadCell)
+		SDL_DestroyTexture(texDeadCell);
 	for (int i = 0; i < 2; i++)
 	{
 		if (walkDown[i]) SDL_DestroyTexture(walkDown[i]);
