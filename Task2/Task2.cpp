@@ -222,15 +222,13 @@ int main(int argc, char* argv[])
 		if (left && px >= 0) px -= v;
 		if (right && px < windowWidth - s) px += v;
 
-		//checks cursor position
-		if (0 < event.motion.x &&
-			windowWidth > event.motion.x &&
-			0 < event.motion.y &&
-			windowHeight > event.motion.y &&
-			event.motion.y != 1024)
+		//checks cursor position (SDL_GetMouseState works on both Windows and Linux)
+		int mouseX, mouseY;
+		SDL_GetMouseState(&mouseX, &mouseY);
+		if (0 < mouseX && mouseX < windowWidth && 0 < mouseY && mouseY < windowHeight)
 		{
-			mx = event.motion.x;
-			my = event.motion.y;
+			mx = mouseX;
+			my = mouseY;
 		}
 		aim = aiming(px + s + s / 2, py + s, mx, my);
 
