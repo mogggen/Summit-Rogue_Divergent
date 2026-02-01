@@ -87,10 +87,11 @@ int main(int argc, char* argv[])
 	int mx = 0;
 	int my = 0;
 	int px = 0, py = 0;  // screen position (computed each frame: playerWorld - scroll)
-	float playerWorldX = (float)(windowWidth / 2);
-	float playerWorldY = (float)(windowHeight / 2);
 	int v = 5;
 	int s = 30;
+	// Spawn at bottom-left of the zoomed map
+	float playerWorldX = (float)(s * 2);
+	float playerWorldY = (float)(worldHeight - s * 3);
 
 	// League-style: click to move (right-click), edge scroll
 	float scrollX = 0, scrollY = 0;
