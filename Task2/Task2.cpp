@@ -153,6 +153,7 @@ int main(int argc, char* argv[])
 	float scrollX = 0, scrollY = 0;
 	float targetWorldX = -1, targetWorldY = -1;
 	bool hasMoveTarget = false;
+	bool isRightMouseHeld = false;
 	const int edgeScrollMargin = 50;
 	const float edgeScrollSpeed = 12.f;
 	int maxScrollX = 0, maxScrollY = 0;
@@ -217,6 +218,7 @@ int main(int argc, char* argv[])
 				else if (event.button.button == SDL_BUTTON_RIGHT)
 				{
 					// League-style: move player to click position (world coords)
+					isRightMouseHeld = true;
 					float clickWorldX = event.button.x + scrollX;
 					float clickWorldY = event.button.y + scrollY;
 					clickWorldX = (clickWorldX < 0) ? 0 : (clickWorldX > worldWidth - s * 2) ? (float)(worldWidth - s * 2) : clickWorldX;
@@ -224,6 +226,13 @@ int main(int argc, char* argv[])
 					targetWorldX = clickWorldX;
 					targetWorldY = clickWorldY;
 					hasMoveTarget = true;
+				}
+				break;
+
+			case SDL_MOUSEBUTTONUP:
+				if (event.button.button == SDL_BUTTON_RIGHT)
+				{
+					isRightMouseHeld = false;
 				}
 				break;
 
@@ -236,6 +245,20 @@ int main(int argc, char* argv[])
 				}
 				break;
 			}
+		}
+
+		// Continuously update target position while right mouse is held
+		if (isRightMouseHeld)
+		{
+			int mouseX, mouseY;
+			SDL_GetMouseState(&mouseX, &mouseY);
+			float clickWorldX = mouseX + scrollX;
+			float clickWorldY = mouseY + scrollY;
+			clickWorldX = (clickWorldX < 0) ? 0 : (clickWorldX > worldWidth - s * 2) ? (float)(worldWidth - s * 2) : clickWorldX;
+			clickWorldY = (clickWorldY < 0) ? 0 : (clickWorldY > worldHeight - s * 3) ? (float)(worldHeight - s * 3) : clickWorldY;
+			targetWorldX = clickWorldX;
+			targetWorldY = clickWorldY;
+			hasMoveTarget = true;
 		}
 
 		// League-style: move player toward click target
