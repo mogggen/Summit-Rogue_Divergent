@@ -23,16 +23,10 @@ float aiming(float px, float py, float mx, float my)
 	return 0.f;
 }
 
-static void fillPlayerState(PlayerState& ps, float worldX, float worldY, float aim, int facing, int walkAnim,
-	int hearts, int ammo, bool reloading) {
+static void fillPlayerState(PlayerState& ps, float worldX, float worldY, int facing) {
 	ps.worldX = worldX;
 	ps.worldY = worldY;
-	ps.aim = aim;
 	ps.facing = (uint8_t)facing;
-	ps.walkAnim = (uint8_t)walkAnim;
-	ps.heartCount = (uint8_t)hearts;
-	ps.ammoCount = (uint8_t)ammo;
-	ps.isReloading = reloading ? 1 : 0;
 }
 
 int main(int argc, char* argv[])
@@ -184,9 +178,6 @@ int main(int argc, char* argv[])
 	Uint32 lastWalkAnimTime = 0;
 	const Uint32 walkAnimInterval = 120;
 
-	int vv = 0;
-	int a = 3;
-
 	float aim = 0;
 
 	// Game of Life: spawn cells when shooting (left click / hold)
@@ -195,54 +186,7 @@ int main(int argc, char* argv[])
 	const Uint32 golSpawnInterval = 80;
 	Uint32 lastGolStepTime = 0;
 	const Uint32 golStepInterval = 200;
-	int floorCount = 1;
-	bool jumping = false;
-	bool floating = false;
-	float jumpStartWorldY = 0;
 	int deltaTime;
-
-	Rectangle* slider = new Rectangle();
-	Rectangle* handle = new Rectangle();
-
-	Rectangle* head = new Rectangle();
-
-	Rectangle *torso = new Rectangle();
-
-	Rectangle *leftLeg = new Rectangle();
-	Rectangle *rightLeg = new Rectangle();
-
-	Rectangle *leftArm = new Rectangle();
-	Rectangle *rightArm = new Rectangle();
-
-	Rectangle *rifle = new Rectangle();
-	Bullet *liveRounds[10];
-
-	Circle *shadow = new Circle();
-
-	Rectangle *tables[4];
-	Rectangle *shells[10];
-	Rectangle *hearts[3];
-	Circle *bullets[10];
-
-	//
-	//	definitons
-	//
-	for (int i = 0; i < sizeof(hearts) / sizeof(*hearts); i++)
-	{
-		hearts[i] = new Rectangle();
-	}
-
-	for (int i = 0; i < sizeof(bullets) / sizeof(*bullets); i++)
-	{
-		bullets[i] = new Circle();
-		shells[i] = new Rectangle();
-		liveRounds[i] = new Bullet();
-	}
-
-	for (int i = 0; i < sizeof(tables) / sizeof(*tables); i++)
-	{
-		tables[i] = new Rectangle();
-	}
 
 	while (!quit)
 	{
@@ -269,16 +213,6 @@ int main(int argc, char* argv[])
 						grid[gy][gx] = true;
 					lastGolSpawnTime = SDL_GetTicks();
 					golSpawnOffset = 1;
-					if (!isReloading)
-					{
-						if (ammoCount > 0)
-						{
-							liveRounds[10 - ammoCount]->SetIsFired(true);
-							ammoCount--;
-						}
-						else
-							isReloading = true;
-					}
 				}
 				else if (event.button.button == SDL_BUTTON_RIGHT)
 				{
@@ -296,44 +230,11 @@ int main(int argc, char* argv[])
 			case SDL_KEYDOWN:
 				switch (event.key.keysym.sym)
 				{
-				case SDLK_r:
-					if (!isReloading && ammoCount < 10)
-						isReloading = true;
-					break;
-
-				case SDLK_SPACE:
-					if (vv == 0 && !jumping)
-					{
-						jumping = true;
-						vv = -18;
-						jumpStartWorldY = playerWorldY;
-					}
-					floating = true;
+				case SDLK_ESCAPE:
+					quit = true;
 					break;
 				}
 				break;
-
-			case SDL_KEYUP:
-				if (event.key.keysym.sym == SDLK_SPACE)
-					floating = false;
-				break;
-			}
-		}
-
-		// Jump mechanics (world Y: up = decrease Y)
-		if (floating)
-			a = 2;
-		else
-			a = 4;
-		if (jumping)
-		{
-			playerWorldY += vv;
-			vv += a;
-			if (playerWorldY >= jumpStartWorldY)
-			{
-				playerWorldY = jumpStartWorldY;
-				vv = 0;
-				jumping = false;
 			}
 		}
 
@@ -467,106 +368,10 @@ int main(int argc, char* argv[])
 			grid.swap(gridNext);
 		}
 
-		//
-		//	Reloading
-		//
-		if (isReloading && reloadingProgress < s * 4)
-		{
-			reloadingProgress += 2;
-			slider->SetRectangle(Point2D(px - s * 2 + s / 2, py - s - s / 2), s * 4, 3);
-			handle->SetRectangle(Point2D(px - s * 2 + s / 2 + reloadingProgress, py - s - s / 2 - 6), 3, 15);
-
-			if (reloadingProgress >= s * 4)
-			{
-				ammoCount = 10;
-				for (int k = 0; k < ammoCount; k++)
-				{
-					liveRounds[k]->SetIsFired(false);
-				}
-			}
-		}
-		else
-		{
-			slider->SetRectangle(Point2D(0, 0), 0, 0);
-			handle->SetRectangle(Point2D(0, 0), 0, 0);
-			reloadingProgress = 0;
-			isReloading = false;
-		}
-
-		//hud
-		for (int i = 0; i < sizeof(hearts) / sizeof(*hearts); i++)
-		{
-			hearts[i]->SetRectangle(Point2D(s / 2 + s * 2 * i / 3, s / 2), s / 2.5f, s);
-		}
-
-		for (int i = 0; i < sizeof(bullets) / sizeof(*bullets); i++)
-		{
-			bullets[i]->SetCircle(Point2D(s / 2 + s * 2 * i / 3, s + s / 4 + 1), s / 5);
-			shells[i]->SetRectangle(Point2D(s / 2 + s * 2 * i / 3, s + s / 2), s / 2.5f, s);
-		}
-
-		int tableWidth = 120, tableHeight = 40;
-
-		tables[0]->SetRectangle(Point2D(windowWidth / 4, windowHeight / 4), tableHeight, tableWidth);
-		tables[1]->SetRectangle(Point2D(3 * windowWidth / 4, windowHeight / 4), tableHeight, tableWidth);
-		tables[2]->SetRectangle(Point2D(2 * windowWidth / 3, windowHeight / 2), tableWidth, tableHeight);
-		tables[3]->SetRectangle(Point2D(windowWidth / 3, windowHeight / 2), tableWidth, tableHeight);
-
-		head->SetRectangle(Point2D(px + 2, py - s + 2), s - 4, s - 4);
-
-		torso->SetRectangle(Point2D(px, py), s, s * 2);
-
-		leftLeg->SetRectangle(Point2D(px, py + s * 2), s / 2 - 2, s * 2);
-		rightLeg->SetRectangle(Point2D(px + s / 2 + 2, py + s * 2), s / 2 - 2, s * 2);
-
-		leftArm->SetRectangle(Point2D(px - s / 2, py + s / 5), s / 2, s + s / 2);
-		rightArm->SetRectangle(Point2D(px + s, py + s / 5), s / 2, s + s / 2);
-
-		rifle->SetRectangle(Point2D(px + s + s / 2, py + s + s / 2), s + 2 * s / 3, s / 3);
-		rifle->SetRotation(aim, Point2D(0, -6));
-
-		if (!jumping)
-			shadow->SetCircle(Point2D(px, py + s * 4 - s / 2), s / 2);
-		else
-		{
-			float groundScreenY = jumpStartWorldY - scrollY;
-			shadow->SetCircle(Point2D(px + (groundScreenY - py) / 4, groundScreenY), s / 2);
-		}
-
-		// Moving bullets (world space: Start+Travel in world, draw at world - scroll)
-		for (int t = 0; t < sizeof(liveRounds) / sizeof(*liveRounds); t++)
-		{
-			if (liveRounds[t]->GetIsFired())
-			{
-				if (liveRounds[t]->GetBulletAim() == 0)
-				{
-					liveRounds[t]->SetBulletAim(aim + float(rand() % (314 / 8)) / 500.0f - (314 / 8) / 1600.0f);
-				}
-				if (liveRounds[t]->GetStart() == Point2D(0, 0))
-					liveRounds[t]->SetStart(Point2D(playerWorldX + s + s / 2, playerWorldY + s + s / 2));
-				liveRounds[t]->SetTravel(Point2D(
-					liveRounds[t]->GetTravel().GetX() + (int)round(SDL_cosf(liveRounds[t]->GetBulletAim()) * 20),
-					liveRounds[t]->GetTravel().GetY() + (int)round(SDL_sinf(liveRounds[t]->GetBulletAim()) * 20)));
-
-				float bx = liveRounds[t]->GetStart().GetX() + liveRounds[t]->GetTravel().GetX() - scrollX;
-				float by = liveRounds[t]->GetStart().GetY() + liveRounds[t]->GetTravel().GetY() - scrollY;
-				liveRounds[t]->SetRectangle(Point2D(bx, by), 50, 12);
-				liveRounds[t]->SetRotation(liveRounds[t]->GetBulletAim(), Point2D(0, -6));
-			}
-			else
-			{
-				liveRounds[t]->SetBulletAim(0.0f);
-				liveRounds[t]->SetStart(Point2D(0, 0));
-				liveRounds[t]->SetTravel(Point2D(0, 0));
-				liveRounds[t]->SetRectangle(Point2D(0, 0), 0, 0);
-			}
-		}
-
 		// Nätverk: skicka lokal state, hämta alla spelare
 		if (isNetworked) {
 			PlayerState localState;
-			fillPlayerState(localState, playerWorldX, playerWorldY, aim, lastFacing, walkAnimFrame,
-				heartCount, ammoCount, isReloading, liveRounds);
+			fillPlayerState(localState, playerWorldX, playerWorldY, lastFacing);
 			if (isHost && server) {
 				localState.playerId = 0;
 				server->tick(localState);
@@ -632,23 +437,12 @@ int main(int argc, char* argv[])
 			case 2: owalkTex = walkLeft[op.walkAnim & 1]; break;
 			case 3: owalkTex = walkRight[op.walkAnim & 1]; break;
 			}
-			SDL_SetRenderDrawColor(renderer, 200, 200, 93, 0);
-				SDL_Rect br = { (int)bx, (int)by, 50, 12 };
-				SDL_RenderFillRect(renderer, &br);
-			}
 			if (owalkTex) {
 				int tw = 0, th = 0;
 				SDL_QueryTexture(owalkTex, nullptr, nullptr, &tw, &th);
 				SDL_Rect dst = { (int)ox, (int)(oy - s), (int)(s * 2), (int)(s * 3) };
 				if (tw > 0 && th > 0) SDL_RenderCopy(renderer, owalkTex, nullptr, &dst);
 			}
-		}
-
-		//liveRounds
-		SDL_SetRenderDrawColor(renderer, 200, 200, 93, 0);
-		for (int i = 0; i < sizeof(liveRounds) / sizeof(*liveRounds); i++)
-		{
-			liveRounds[i]->render(renderer);
 		}
 
 		// Player: walk animation sprite (green_boy) or fallback to rectangles
@@ -669,22 +463,6 @@ int main(int argc, char* argv[])
 				SDL_RenderCopy(renderer, walkTex, nullptr, &dst);
 		}
 
-
-		//hud
-		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 0);
-		for (int i = 0; i < heartCount; i++)
-		{
-			hearts[i]->render(renderer);
-		}
-
-		for (int i = 0; i < ammoCount; i++)
-		{
-			SDL_SetRenderDrawColor(renderer, 105, 105, 105, 0);
-			bullets[i]->render(renderer);
-			SDL_SetRenderDrawColor(renderer, 255, 191, 0, 0);
-			shells[i]->render(renderer);
-		}
-
 		SDL_RenderPresent(renderer);
 
 
@@ -697,16 +475,6 @@ int main(int argc, char* argv[])
 	//
 	//	deallocating
 	//
-
-
-	for (int i = 0; i < sizeof(shells) / sizeof(*shells); i++)
-	{
-		delete shells[i];
-		delete bullets[i];
-		delete liveRounds[i];
-	}
-
-
 	if (mapTexture)
 		SDL_DestroyTexture(mapTexture);
 	if (texAliveCell)
