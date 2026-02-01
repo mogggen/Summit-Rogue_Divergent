@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <ctime>
+#include <cmath>
 #include "Rectangle.h"
 #include "Circle.h"
 #include "Bullet.h"
@@ -32,7 +33,7 @@ int main(int argc, char* argv[])
 	SDL_Event event;
 	std::cout << "----" << title << "----" << std::endl;
 	std::cout << "Resolution: " << windowWidth << "x" << windowHeight << std::endl;
-	std::cout << "WASD to move\nleft_click to shoot\nSPACE to jump";
+	std::cout << "Right-click to move | Left-click to shoot | Edge-scroll with mouse | SPACE to jump";
 	SDL_Window *window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, SDL_WINDOW_SHOWN);
 	SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, 0);
 
@@ -85,17 +86,18 @@ int main(int argc, char* argv[])
 
 	int mx = 0;
 	int my = 0;
-	int px = windowWidth / 2;
-	int py = windowHeight / 2;
+	int px = 0, py = 0;  // screen position (computed each frame: playerWorld - scroll)
+	float playerWorldX = (float)(windowWidth / 2);
+	float playerWorldY = (float)(windowHeight / 2);
 	int v = 5;
 	int s = 30;
 
-	// Scroll only when player leaves center zone (free area = width/4 and height/4 from center)
+	// League-style: click to move (right-click), edge scroll
 	float scrollX = 0, scrollY = 0;
-	const int centerZoneLeft   = windowWidth / 4;
-	const int centerZoneRight  = (3 * windowWidth) / 4;
-	const int centerZoneTop    = windowHeight / 4;
-	const int centerZoneBottom = (3 * windowHeight) / 4;
+	float targetWorldX = -1, targetWorldY = -1;
+	bool hasMoveTarget = false;
+	const int edgeScrollMargin = 50;
+	const float edgeScrollSpeed = 12.f;
 	int maxScrollX = 0, maxScrollY = 0;
 	if (mapWidth > 0 && mapHeight > 0)
 	{
@@ -112,7 +114,6 @@ int main(int argc, char* argv[])
 
 	int fireDelay = 0;
 
-	bool up = false, down = false, left = false, right = false;
 
 	// Walk animation: 0=down, 1=up, 2=left, 3=right
 	int lastFacing = 0;
@@ -134,7 +135,7 @@ int main(int argc, char* argv[])
 	int floorCount = 1;
 	bool jumping = false;
 	bool floating = false;
-	int temp = py;
+	float jumpStartWorldY = 0;
 	int deltaTime;
 
 	Rectangle* slider = new Rectangle();
@@ -197,7 +198,7 @@ int main(int argc, char* argv[])
 				if (event.button.button == SDL_BUTTON_LEFT)
 				{
 					// Game of Life: spawn one cell immediately in aim direction
-					float pwX = px + scrollX, pwY = py + scrollY;
+					float pwX = playerWorldX, pwY = playerWorldY;
 					float wx = pwX + cellSize * SDL_cosf(aim);
 					float wy = pwY + cellSize * SDL_sinf(aim);
 					int gx = (int)(wx / cellSize), gy = (int)(wy / cellSize);
@@ -216,31 +217,22 @@ int main(int argc, char* argv[])
 							isReloading = true;
 					}
 				}
+				else if (event.button.button == SDL_BUTTON_RIGHT)
+				{
+					// League-style: move player to click position (world coords)
+					float clickWorldX = event.button.x + scrollX;
+					float clickWorldY = event.button.y + scrollY;
+					clickWorldX = (clickWorldX < 0) ? 0 : (clickWorldX > worldWidth - s * 2) ? (float)(worldWidth - s * 2) : clickWorldX;
+					clickWorldY = (clickWorldY < 0) ? 0 : (clickWorldY > worldHeight - s * 3) ? (float)(worldHeight - s * 3) : clickWorldY;
+					targetWorldX = clickWorldX;
+					targetWorldY = clickWorldY;
+					hasMoveTarget = true;
+				}
 				break;
 
 			case SDL_KEYDOWN:
 				switch (event.key.keysym.sym)
 				{
-				case SDLK_w:
-				case SDLK_UP:
-					up = true;
-					break;
-
-				case SDLK_s:
-				case SDLK_DOWN:
-					down = true;
-					break;
-
-				case SDLK_a:
-				case SDLK_LEFT:
-					left = true;
-					break;
-
-				case SDLK_d:
-				case SDLK_RIGHT:
-					right = true;
-					break;
-
 				case SDLK_r:
 					if (!isReloading && ammoCount < 10)
 						isReloading = true;
@@ -251,7 +243,7 @@ int main(int argc, char* argv[])
 					{
 						jumping = true;
 						vv = -18;
-						temp = py;
+						jumpStartWorldY = playerWorldY;
 					}
 					floating = true;
 					break;
@@ -259,117 +251,107 @@ int main(int argc, char* argv[])
 				break;
 
 			case SDL_KEYUP:
-				switch (event.key.keysym.sym)
-				{
-				case SDLK_w:
-				case SDLK_UP:
-					up = false;
-					break;
-
-				case SDLK_s:
-				case SDLK_DOWN:
-					down = false;
-					break;
-
-				case SDLK_a:
-				case SDLK_LEFT:
-					left = false;
-					break;
-
-				case SDLK_d:
-				case SDLK_RIGHT:
-					right = false;
-					break;
-
-				case SDLK_SPACE:
+				if (event.key.keysym.sym == SDLK_SPACE)
 					floating = false;
-					break;
-				}
 				break;
 			}
 		}
 
-		//jumping mechanics (prototype)
+		// Jump mechanics (world Y: up = decrease Y)
 		if (floating)
 			a = 2;
-		else a = 4;
-		if (py <= temp && jumping)
+		else
+			a = 4;
+		if (jumping)
 		{
-			py += vv;
+			playerWorldY += vv;
 			vv += a;
-		}
-		else
-		{
-			vv = 0;
-			jumping = false;
-		}
-
-		// Movement: free in center zone (width/4, height/4 from center); scroll only outside it.
-		// When moving back towards center, always reduce scroll so camera follows and scroll turns off.
-		if (up)
-		{
-			if (py > centerZoneTop)
+			if (playerWorldY >= jumpStartWorldY)
 			{
-				py -= v;
-				if (scrollY > 0)
-					scrollY = (scrollY - v > 0) ? scrollY - v : 0;
-			}
-			else if (scrollY > 0)
-				scrollY = (scrollY - v > 0) ? scrollY - v : 0;
-			else
-				py = centerZoneTop;
-		}
-		if (down)
-		{
-			if (scrollY > 0)
-				scrollY = (scrollY - v > 0) ? scrollY - v : 0;
-			else if (py < centerZoneBottom - s * 3)
-				py += v;
-			else if (scrollY < maxScrollY)
-				scrollY = (scrollY + v < maxScrollY) ? scrollY + v : (float)maxScrollY;
-			else
-				py = centerZoneBottom - s * 3;
-		}
-		if (left)
-		{
-			if (scrollX > 0)
-				scrollX = (scrollX - v > 0) ? scrollX - v : 0;
-			else if (px > centerZoneLeft)
-				px -= v;
-			else
-				px = centerZoneLeft;
-		}
-		if (right)
-		{
-			if (px < centerZoneRight - s)
-				px += v;
-			else if (scrollX < maxScrollX)
-				scrollX = (scrollX + v < maxScrollX) ? scrollX + v : (float)maxScrollX;
-			else
-				px = centerZoneRight - s;
-		}
-
-		// Update facing and walk animation frame
-		bool isWalking = up || down || left || right;
-		if (isWalking)
-		{
-			if (down) lastFacing = 0;
-			else if (up) lastFacing = 1;
-			else if (left) lastFacing = 2;
-			else if (right) lastFacing = 3;
-			Uint32 now = SDL_GetTicks();
-			if (now - lastWalkAnimTime >= walkAnimInterval)
-			{
-				lastWalkAnimTime = now;
-				walkAnimFrame = 1 - walkAnimFrame;
+				playerWorldY = jumpStartWorldY;
+				vv = 0;
+				jumping = false;
 			}
 		}
-		else
+
+		// League-style: move player toward click target
+		bool isWalking = false;
+		if (hasMoveTarget)
+		{
+			float dx = targetWorldX - playerWorldX;
+			float dy = targetWorldY - playerWorldY;
+			float dist = sqrtf(dx * dx + dy * dy);
+			const float arriveRadius = 6.f;
+			if (dist <= arriveRadius)
+			{
+				hasMoveTarget = false;
+			}
+			else
+			{
+				isWalking = true;
+				float step = (v < dist) ? (float)v : dist;
+				playerWorldX += (dx / dist) * step;
+				playerWorldY += (dy / dist) * step;
+				playerWorldX = (playerWorldX < 0) ? 0 : (playerWorldX > worldWidth - s * 2) ? (float)(worldWidth - s * 2) : playerWorldX;
+				playerWorldY = (playerWorldY < 0) ? 0 : (playerWorldY > worldHeight - s * 3) ? (float)(worldHeight - s * 3) : playerWorldY;
+				if (SDL_fabsf(dx) >= SDL_fabsf(dy))
+					lastFacing = (dx > 0) ? 3 : 2;
+				else
+					lastFacing = (dy > 0) ? 0 : 1;
+			}
+		}
+		Uint32 now = SDL_GetTicks();
+		if (isWalking && now - lastWalkAnimTime >= walkAnimInterval)
+		{
+			lastWalkAnimTime = now;
+			walkAnimFrame = 1 - walkAnimFrame;
+		}
+		if (!isWalking)
 			walkAnimFrame = 0;
 
-		//checks cursor position (SDL_GetMouseState works on both Windows and Linux)
+		// League-style camera: edge scroll when mouse near screen edge, else follow player
 		int mouseX, mouseY;
 		SDL_GetMouseState(&mouseX, &mouseY);
+		bool edgeScrolling = false;
+		if (mouseX < edgeScrollMargin && scrollX > 0)
+		{
+			scrollX -= edgeScrollSpeed;
+			if (scrollX < 0) scrollX = 0;
+			edgeScrolling = true;
+		}
+		if (mouseX > windowWidth - edgeScrollMargin && scrollX < maxScrollX)
+		{
+			scrollX += edgeScrollSpeed;
+			if (scrollX > maxScrollX) scrollX = (float)maxScrollX;
+			edgeScrolling = true;
+		}
+		if (mouseY < edgeScrollMargin && scrollY > 0)
+		{
+			scrollY -= edgeScrollSpeed;
+			if (scrollY < 0) scrollY = 0;
+			edgeScrolling = true;
+		}
+		if (mouseY > windowHeight - edgeScrollMargin && scrollY < maxScrollY)
+		{
+			scrollY += edgeScrollSpeed;
+			if (scrollY > maxScrollY) scrollY = (float)maxScrollY;
+			edgeScrolling = true;
+		}
+		if (!edgeScrolling)
+		{
+			scrollX = playerWorldX - windowWidth / 2.f + (s * 2) / 2.f;
+			scrollY = playerWorldY - windowHeight / 2.f + (s * 3) / 2.f;
+			if (scrollX < 0) scrollX = 0;
+			if (scrollY < 0) scrollY = 0;
+			if (scrollX > maxScrollX) scrollX = (float)maxScrollX;
+			if (scrollY > maxScrollY) scrollY = (float)maxScrollY;
+		}
+
+		// Screen position from world and scroll (for drawing and aim)
+		px = (int)(playerWorldX - scrollX);
+		py = (int)(playerWorldY - scrollY);
+
+		// Cursor for aim (mx, my already set from edge-scroll block above)
 		if (0 < mouseX && mouseX < windowWidth && 0 < mouseY && mouseY < windowHeight)
 		{
 			mx = mouseX;
@@ -385,9 +367,8 @@ int main(int argc, char* argv[])
 			if (now - lastGolSpawnTime >= golSpawnInterval)
 			{
 				lastGolSpawnTime = now;
-				float pwX = px + scrollX, pwY = py + scrollY;
-				float wx = pwX + (golSpawnOffset + 1) * cellSize * SDL_cosf(aim);
-				float wy = pwY + (golSpawnOffset + 1) * cellSize * SDL_sinf(aim);
+				float wx = playerWorldX + (golSpawnOffset + 1) * cellSize * SDL_cosf(aim);
+				float wy = playerWorldY + (golSpawnOffset + 1) * cellSize * SDL_sinf(aim);
 				int gx = (int)(wx / cellSize);
 				int gy = (int)(wy / cellSize);
 				if (gx >= 0 && gx < gridCols && gy >= 0 && gy < gridRows)
@@ -482,9 +463,12 @@ int main(int argc, char* argv[])
 		if (!jumping)
 			shadow->SetCircle(Point2D(px, py + s * 4 - s / 2), s / 2);
 		else
-			shadow->SetCircle(Point2D(px + (temp - py) / 4, temp), s / py - temp);
+		{
+			float groundScreenY = jumpStartWorldY - scrollY;
+			shadow->SetCircle(Point2D(px + (groundScreenY - py) / 4, groundScreenY), s / 2);
+		}
 
-		//moving bullets
+		// Moving bullets (world space: Start+Travel in world, draw at world - scroll)
 		for (int t = 0; t < sizeof(liveRounds) / sizeof(*liveRounds); t++)
 		{
 			if (liveRounds[t]->GetIsFired())
@@ -493,12 +477,15 @@ int main(int argc, char* argv[])
 				{
 					liveRounds[t]->SetBulletAim(aim + float(rand() % (314 / 8)) / 500.0f - (314 / 8) / 1600.0f);
 				}
-				if (liveRounds[t]->GetStart() == Point2D(0, 0)) liveRounds[t]->SetStart(Point2D(px + s + s / 2, py + s + s / 2));
+				if (liveRounds[t]->GetStart() == Point2D(0, 0))
+					liveRounds[t]->SetStart(Point2D(playerWorldX + s + s / 2, playerWorldY + s + s / 2));
 				liveRounds[t]->SetTravel(Point2D(
-					liveRounds[t]->GetTravel().GetX() + (int)round(SDL_cosf(liveRounds[t]->GetBulletAim()) * 20), 
+					liveRounds[t]->GetTravel().GetX() + (int)round(SDL_cosf(liveRounds[t]->GetBulletAim()) * 20),
 					liveRounds[t]->GetTravel().GetY() + (int)round(SDL_sinf(liveRounds[t]->GetBulletAim()) * 20)));
 
-				liveRounds[t]->SetRectangle(liveRounds[t]->GetStart() + liveRounds[t]->GetTravel(), 50, 12);
+				float bx = liveRounds[t]->GetStart().GetX() + liveRounds[t]->GetTravel().GetX() - scrollX;
+				float by = liveRounds[t]->GetStart().GetY() + liveRounds[t]->GetTravel().GetY() - scrollY;
+				liveRounds[t]->SetRectangle(Point2D(bx, by), 50, 12);
 				liveRounds[t]->SetRotation(liveRounds[t]->GetBulletAim(), Point2D(0, -6));
 			}
 			else
@@ -506,7 +493,6 @@ int main(int argc, char* argv[])
 				liveRounds[t]->SetBulletAim(0.0f);
 				liveRounds[t]->SetStart(Point2D(0, 0));
 				liveRounds[t]->SetTravel(Point2D(0, 0));
-
 				liveRounds[t]->SetRectangle(Point2D(0, 0), 0, 0);
 			}
 		}
