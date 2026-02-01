@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
 	const char title[18] = "Enter the Gungeon";
 	int enemies = 0;
 	bool quit = false;
-	int windowWidth = 1000, windowHeight = 800;
+	int windowWidth = 1920, windowHeight = 1200;
 	SDL_Init(SDL_INIT_EVERYTHING);
 	SDL_Event event;
 	std::cout << "----" << title << "----" << std::endl;
