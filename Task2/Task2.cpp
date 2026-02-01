@@ -89,9 +89,11 @@ int main(int argc, char* argv[])
 	int px = 0, py = 0;  // screen position (computed each frame: playerWorld - scroll)
 	int v = 5;
 	int s = 30;
-	// Spawn at bottom-left of the zoomed map
-	float playerWorldX = (float)(s * 2);
-	float playerWorldY = (float)(worldHeight - s * 3);
+	// Spawn point (change these to move where the player starts)
+	float spawnWorldX = (float)(s * 2);
+	float spawnWorldY = (float)(worldHeight - s * 3);
+	float playerWorldX = spawnWorldX;
+	float playerWorldY = spawnWorldY;
 
 	// League-style: click to move (right-click), edge scroll
 	float scrollX = 0, scrollY = 0;
@@ -297,10 +299,12 @@ int main(int argc, char* argv[])
 				playerWorldY = (playerWorldY < 0) ? 0 : (playerWorldY > worldHeight - s * 3) ? (float)(worldHeight - s * 3) : playerWorldY;
 				if (SDL_fabsf(dx) >= SDL_fabsf(dy))
 					lastFacing = (dx > 0) ? 3 : 2;
-				else
-					lastFacing = (dy > 0) ? 0 : 1;
+			else
+				lastFacing = (dy > 0) ? 0 : 1;
 			}
 		}
+		if (isWalking)
+			std::cout << "Player position: (" << playerWorldX << ", " << playerWorldY << ")" << std::endl;
 		Uint32 now = SDL_GetTicks();
 		if (isWalking && now - lastWalkAnimTime >= walkAnimInterval)
 		{
