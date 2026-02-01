@@ -9,6 +9,8 @@ if (UNIX AND NOT APPLE)
     Bullet.h
     Circle.cpp
     Circle.h
+    Network.cpp
+    Network.h
     Point2D.cpp
     Point2D.h
     Rectangle.cpp

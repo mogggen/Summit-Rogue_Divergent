@@ -6,6 +6,7 @@
 #include "Rectangle.h"
 #include "Circle.h"
 #include "Bullet.h"
+#include "Network.h"
 #include "SDL.h"
 #include "SDL_image.h"
 
@@ -19,6 +20,19 @@ float aiming(float px, float py, float mx, float my)
 		return atan(float(my - py) / float(mx - px));
 	else if (mx >= px && my <= py)
 		return atan(float(py - my) / float(px - mx));
+	return 0.f;
+}
+
+static void fillPlayerState(PlayerState& ps, float worldX, float worldY, float aim, int facing, int walkAnim,
+	int hearts, int ammo, bool reloading) {
+	ps.worldX = worldX;
+	ps.worldY = worldY;
+	ps.aim = aim;
+	ps.facing = (uint8_t)facing;
+	ps.walkAnim = (uint8_t)walkAnim;
+	ps.heartCount = (uint8_t)hearts;
+	ps.ammoCount = (uint8_t)ammo;
+	ps.isReloading = reloading ? 1 : 0;
 }
 
 int main(int argc, char* argv[])
@@ -29,10 +43,34 @@ int main(int argc, char* argv[])
 	int enemies = 0;
 	bool quit = false;
 	int windowWidth = 1920, windowHeight = 1200;
+
+	// Nätverk: --host (värd) eller --join [ip] (klient, default 127.0.0.1)
+	bool isHost = false;
+	bool isClient = false;
+	std::string joinHost = "127.0.0.1";
+	for (int i = 1; i < argc; i++) {
+		std::string arg = argv[i];
+		if (arg == "--host") isHost = true;
+		else if (arg == "--join") {
+			isClient = true;
+			if (i + 1 < argc && argv[i + 1][0] != '-') { joinHost = argv[i + 1]; i++; }
+		}
+	}
+	bool isNetworked = isHost || isClient;
+	uint8_t myPlayerId = 0;
+	NetworkServer* server = nullptr;
+	NetworkClient* client = nullptr;
+	std::vector<PlayerState> allPlayers;
+
 	SDL_Init(SDL_INIT_EVERYTHING);
+	if (isNetworked) networkInit();
 	SDL_Event event;
 	std::cout << "----" << title << "----" << std::endl;
 	std::cout << "Resolution: " << windowWidth << "x" << windowHeight << std::endl;
+	if (isNetworked) {
+		if (isHost) std::cout << "Värd (localhost:" << NETWORK_PORT << ")" << std::endl;
+		else std::cout << "Klient -> " << joinHost << std::endl;
+	}
 	std::cout << "Right-click to move | Left-click to shoot | Edge-scroll with mouse | SPACE to jump";
 	SDL_Window *window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, SDL_WINDOW_SHOWN);
 	SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, 0);
@@ -81,6 +119,28 @@ int main(int argc, char* argv[])
 		IMG_LoadTexture(renderer, (std::string(spriteBase) + "walk-right-0.png").c_str()),
 		IMG_LoadTexture(renderer, (std::string(spriteBase) + "walk-right-1.png").c_str())
 	};
+
+	if (isHost) {
+		server = new NetworkServer();
+		if (!server->start()) {
+			delete server;
+			server = nullptr;
+			isHost = false;
+			isNetworked = false;
+		}
+	}
+	if (isClient) {
+		client = new NetworkClient();
+		if (!client->connectTo(joinHost)) {
+			delete client;
+			client = nullptr;
+			isClient = false;
+			isNetworked = false;
+			std::cerr << "Kunde inte ansluta till " << joinHost << ". Spelar ensam.\n";
+		} else {
+			myPlayerId = client->getMyPlayerId();
+		}
+	}
 
 	int frameDelay = 17;
 
@@ -502,6 +562,25 @@ int main(int argc, char* argv[])
 			}
 		}
 
+		// Nätverk: skicka lokal state, hämta alla spelare
+		if (isNetworked) {
+			PlayerState localState;
+			fillPlayerState(localState, playerWorldX, playerWorldY, aim, lastFacing, walkAnimFrame,
+				heartCount, ammoCount, isReloading, liveRounds);
+			if (isHost && server) {
+				localState.playerId = 0;
+				server->tick(localState);
+				allPlayers.clear();
+				allPlayers.push_back(localState);
+				std::vector<PlayerState> clientStates;
+				server->getFullState(clientStates);
+				for (const auto& cs : clientStates) allPlayers.push_back(cs);
+			} else if (isClient && client) {
+				localState.playerId = myPlayerId;
+				client->tick(localState, allPlayers);
+			}
+		}
+
 		//
 		//	rendering
 		//
@@ -537,6 +616,31 @@ int main(int argc, char* argv[])
 					SDL_Rect dst = { (int)sx, (int)sy, cellSize, cellSize };
 					SDL_RenderCopy(renderer, cellTex, nullptr, &dst);
 				}
+			}
+		}
+
+		// Andra spelare (nätverk): rita deras kulor och figur
+		for (size_t i = 0; i < allPlayers.size(); i++) {
+			if (i == myPlayerId) continue;
+			const PlayerState& op = allPlayers[i];
+			float ox = op.worldX - scrollX;
+			float oy = op.worldY - scrollY;
+			SDL_Texture* owalkTex = nullptr;
+			switch (op.facing) {
+			case 0: owalkTex = walkDown[op.walkAnim & 1]; break;
+			case 1: owalkTex = walkUp[op.walkAnim & 1]; break;
+			case 2: owalkTex = walkLeft[op.walkAnim & 1]; break;
+			case 3: owalkTex = walkRight[op.walkAnim & 1]; break;
+			}
+			SDL_SetRenderDrawColor(renderer, 200, 200, 93, 0);
+				SDL_Rect br = { (int)bx, (int)by, 50, 12 };
+				SDL_RenderFillRect(renderer, &br);
+			}
+			if (owalkTex) {
+				int tw = 0, th = 0;
+				SDL_QueryTexture(owalkTex, nullptr, nullptr, &tw, &th);
+				SDL_Rect dst = { (int)ox, (int)(oy - s), (int)(s * 2), (int)(s * 3) };
+				if (tw > 0 && th > 0) SDL_RenderCopy(renderer, owalkTex, nullptr, &dst);
 			}
 		}
 
@@ -617,6 +721,10 @@ int main(int argc, char* argv[])
 		if (walkRight[i]) SDL_DestroyTexture(walkRight[i]);
 	}
 	IMG_Quit();
+
+	if (server) { delete server; server = nullptr; }
+	if (client) { delete client; client = nullptr; }
+	if (isNetworked) networkQuit();
 
 	SDL_DestroyWindow(window);
 	SDL_DestroyRenderer(renderer);
